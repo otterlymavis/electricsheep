@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Button Style Previews</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    :root {
+      --bg:     #060512;
+      --panel:  rgba(10,9,26,0.97);
+      --cyan:   #00e5ff;
+      --pink:   #ff2d6f;
+      --purple: #a78bfa;
+      --mint:   #5eead4;
+      --amber:  #fbbf24;
+      --text:   #dde4f0;
+      --muted:  #55647a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 40px 32px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(circle, rgba(0,229,255,0.05) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 36px;
+      position: relative;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      position: relative;
+    }
+
+    .option {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .option-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .label-a { background: rgba(0,229,255,0.12); color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
+    .label-b { background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+    .label-c { background: rgba(255,45,111,0.1); color: var(--pink); border: 1px solid rgba(255,45,111,0.3); }
+
+    .stage {
+      background: rgba(6,5,18,0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .stage-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    /* ── OPTION A: Neon outline ── */
+    .btn-a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px 9px 12px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      background: rgba(0, 229, 255, 0.06);
+      border: 1.5px solid var(--cyan);
+      color: #e0faff;
+      box-shadow: 0 0 12px rgba(0,229,255,0.45), inset 0 0 8px rgba(0,229,255,0.07);
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+
+    .btn-a:hover {
+      box-shadow: 0 0 24px rgba(0,229,255,0.7), inset 0 0 14px rgba(0,229,255,0.12);
+    }
+
+    .btn-a .icon { font-size: 1rem; }
+
+    /* ── OPTION B: Solid tinted per-button ── */
+    .btn-b {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px 9px 12px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .btn-b:hover { filter: brightness(1.2); }
+    .btn-b .icon { font-size: 1rem; }
+
+    .btn-b.save     { background: rgba(0,229,255,0.18);   border: 1px solid rgba(0,229,255,0.55);   color: #a8f4ff; }
+    .btn-b.library  { background: rgba(167,139,250,0.18); border: 1px solid rgba(167,139,250,0.55); color: #d4c8ff; }
+    .btn-b.sessions { background: rgba(94,234,212,0.18);  border: 1px solid rgba(94,234,212,0.55);  color: #a0f5e6; }
+    .btn-b.search   { background: rgba(255,45,111,0.14);  border: 1px solid rgba(255,45,111,0.5);   color: #ffb0c8; }
+    .btn-b.tools    { background: rgba(251,191,36,0.14);  border: 1px solid rgba(251,191,36,0.5);   color: #fde6a0; }
+
+    /* ── OPTION C: Bigger + idle pulse ── */
+    .btn-c {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 20px 11px 14px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      background: var(--panel);
+      border: 1.5px solid rgba(0,229,255,0.45);
+      color: var(--text);
+      cursor: pointer;
+      animation: idle-pulse 3s ease-in-out infinite;
+    }
+
+    .btn-c .icon { font-size: 1.3rem; }
+
+    @keyframes idle-pulse {
+      0%, 100% { box-shadow: 0 0 6px rgba(0,229,255,0.2), 0 2px 12px rgba(0,0,0,0.4); }
+      50%       { box-shadow: 0 0 20px rgba(0,229,255,0.55), 0 2px 16px rgba(0,0,0,0.5); }
+    }
+
+    /* stagger the pulse per button */
+    .btn-c:nth-child(1) { animation-delay: 0s;    }
+    .btn-c:nth-child(2) { animation-delay: 0.6s;  }
+    .btn-c:nth-child(3) { animation-delay: 1.2s;  }
+    .btn-c:nth-child(4) { animation-delay: 1.8s;  }
+    .btn-c:nth-child(5) { animation-delay: 2.4s;  }
+
+    .btn-c:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 28px rgba(0,229,255,0.65), 0 2px 20px rgba(0,0,0,0.5);
+      color: var(--cyan);
+      animation: none;
+    }
+
+    /* description */
+    .desc {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #8899b8;
+      padding: 0 2px;
+    }
+
+    .desc strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .divider {
+      width: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+<body>
+
+<h1>Electric Sheep — Floating Button Style Options</h1>
+
+<div class="grid">
+
+  <!-- Option A -->
+  <div class="option">
+    <span class="option-label label-a">Option A — Neon Outline</span>
+    <div class="stage">
+      <div class="stage-title">buttons</div>
+      <button class="btn-a"><span class="icon">⊕</span> Save</button>
+      <button class="btn-a"><span class="icon">◈</span> Library</button>
+      <button class="btn-a"><span class="icon">◉</span> Sessions</button>
+      <button class="btn-a"><span class="icon">◎</span> Search</button>
+      <button class="btn-a"><span class="icon">⬡</span> Tools</button>
+    </div>
+    <p class="desc">
+      <strong>Full-brightness cyan border</strong> on every button at all times. Constant soft glow radiates outward. Looks like lit neon tubing. All buttons same colour — clean and unified.
+    </p>
+  </div>
+
+  <!-- Option B -->
+  <div class="option">
+    <span class="option-label label-b">Option B — Colour-coded</span>
+    <div class="stage">
+      <div class="stage-title">buttons</div>
+      <button class="btn-b save"><span class="icon">⊕</span> Save</button>
+      <button class="btn-b library"><span class="icon">◈</span> Library</button>
+      <button class="btn-b sessions"><span class="icon">◉</span> Sessions</button>
+      <button class="btn-b search"><span class="icon">◎</span> Search</button>
+      <button class="btn-b tools"><span class="icon">⬡</span> Tools</button>
+    </div>
+    <p class="desc">
+      <strong>Each button gets its own colour</strong> — cyan, purple, mint, pink, amber. Tinted fill + matching border. Instantly tells them apart at a glance.
+    </p>
+  </div>
+
+  <!-- Option C -->
+  <div class="option">
+    <span class="option-label label-c">Option C — Bigger + Pulse</span>
+    <div class="stage">
+      <div class="stage-title">buttons (animated)</div>
+      <button class="btn-c"><span class="icon">⊕</span> Save</button>
+      <button class="btn-c"><span class="icon">◈</span> Library</button>
+      <button class="btn-c"><span class="icon">◉</span> Sessions</button>
+      <button class="btn-c"><span class="icon">◎</span> Search</button>
+      <button class="btn-c"><span class="icon">⬡</span> Tools</button>
+    </div>
+    <p class="desc">
+      <strong>Larger size + staggered idle glow pulse.</strong> Each button gently breathes in and out at slightly different times, drawing the eye naturally. Hover stops the pulse and locks to bright cyan.
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>
