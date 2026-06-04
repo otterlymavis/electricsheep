@@ -6,6 +6,7 @@ const { pathToFileURL } = require("node:url");
 const { exportArchive, importArchive } = require("./export");
 const { readImageText } = require("./ocr");
 const { searchArchive } = require("./search");
+const pty = require("node-pty");
 const { deleteBookmark, deleteSession, ensureStore, getStorePaths, isInsideBaseDir, readBookmarks, readSessions, updateBookmarks, writeBookmarks } = require("./store");
 
 let mainWindow;
@@ -279,7 +280,6 @@ ipcMain.handle("ocr:backfill", async () => {
 });
 
 ipcMain.handle("doctor:check", async () => {
-  const pty = require("node-pty");
   const checks = [
     { name: "Store", ok: true, detail: getStorePaths().baseDir }
   ];

@@ -306,7 +306,7 @@ body::after {
 .panel-close {
   width: 22px; height: 22px;
   border-radius: 50%;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.3);
   background: transparent;
   color: var(--muted);
   font-size: 0.7rem;
@@ -548,7 +548,7 @@ h3 {
   max-height: 200px;
   overflow: auto;
   background: #0a0918;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.2);
   border-radius: 8px;
   padding: 10px;
   font: 0.75rem/1.45 'JetBrains Mono', monospace;
@@ -646,7 +646,7 @@ h3 {
   width: 100%;
   max-height: 140px;
   object-fit: cover;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.2);
   border-radius: 7px;
 }
 
@@ -706,7 +706,7 @@ h3 {
   text-transform: uppercase;
   color: var(--muted);
   padding-bottom: 4px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(var(--br, 0,229,255), 0.22);
 }
 
 .settings-row {
@@ -736,8 +736,8 @@ h3 {
 }
 
 kbd {
-  background: var(--panel-hi);
-  border: 1px solid var(--border);
+  background: rgba(var(--br, 0,229,255), 0.08);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.25);
   border-radius: 5px;
   padding: 2px 7px;
   font-family: 'JetBrains Mono', monospace;
