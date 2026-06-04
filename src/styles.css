@@ -499,7 +499,7 @@ h3 {
 
 .bookmark-note {
   margin: 0;
-  border-left: 2px solid var(--pink);
+  border-left: 2px solid var(--bc, var(--pink));
   padding-left: 9px;
   font-size: 0.82rem;
   line-height: 1.45;
@@ -512,9 +512,9 @@ h3 {
 .tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
 
 .tag {
-  background: rgba(0, 229, 255, 0.07);
-  border: 1px solid rgba(0, 229, 255, 0.22);
-  color: var(--cyan);
+  background: rgba(var(--br, 0,229,255), 0.09);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.28);
+  color: var(--bc, var(--cyan));
   border-radius: 999px;
   padding: 3px 9px;
   font-family: 'JetBrains Mono', monospace;
@@ -525,9 +525,9 @@ h3 {
 /* ── Status pills ─────────────────────────────────────────────────────── */
 .status-pill {
   border-radius: 999px;
-  background: rgba(0, 229, 255, 0.08);
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  color: var(--cyan);
+  background: rgba(var(--br, 0,229,255), 0.09);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.28);
+  color: var(--bc, var(--cyan));
   padding: 2px 8px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
@@ -575,23 +575,26 @@ h3 {
 .primary-button {
   min-height: 32px;
   padding: 0 12px;
-  background: var(--cyan);
+  background: var(--bc, var(--cyan));
   color: #060512;
   font-size: 0.78rem;
-  box-shadow: 0 0 10px rgba(0,229,255,0.3);
+  box-shadow: 0 0 10px rgba(var(--br, 0,229,255), 0.35);
 }
 
 .secondary-button {
   min-height: 32px;
   padding: 0 12px;
-  background: var(--panel-hi);
-  border: 1px solid var(--border);
+  background: rgba(var(--br, 0,229,255), 0.07);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.22);
   color: var(--text);
   font-size: 0.78rem;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 }
 
-.secondary-button:hover { border-color: var(--cyan); }
+.secondary-button:hover {
+  border-color: rgba(var(--br, 0,229,255), 0.6);
+  color: var(--bc, var(--cyan));
+}
 
 .small-button { min-height: 28px; padding: 0 10px; font-size: 0.72rem; }
 
@@ -664,9 +667,9 @@ h3 {
 
 .file-badge {
   border-radius: 999px;
-  background: rgba(0,229,255,0.08);
-  border: 1px solid rgba(0,229,255,0.2);
-  color: var(--cyan);
+  background: rgba(var(--br, 0,229,255), 0.09);
+  border: 1px solid rgba(var(--br, 0,229,255), 0.28);
+  color: var(--bc, var(--cyan));
   padding: 3px 8px;
   font-size: 0.62rem;
   font-weight: 900;
@@ -681,8 +684,8 @@ h3 {
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
   flex-shrink: 0;
-  background: rgba(0,229,255,0.08);
-  color: var(--cyan);
+  background: rgba(var(--br, 0,229,255), 0.09);
+  color: var(--bc, var(--cyan));
 }
 
 .ocr-status.empty   { background: rgba(251,191,36,0.1);  color: var(--amber); }
