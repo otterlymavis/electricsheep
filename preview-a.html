@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Electric Sheep — Preview A: Ghost Signal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    :root {
+      --bg:        #07060f;
+      --panel:     #0e0d1c;
+      --panel-hi:  #13122a;
+      --border:    rgba(0, 229, 255, 0.15);
+      --border-hi: rgba(0, 229, 255, 0.45);
+      --cyan:      #00e5ff;
+      --pink:      #ff2d6f;
+      --purple:    #b48eff;
+      --text:      #dde4f0;
+      --muted:     #5a6a90;
+      --tag-bg:    rgba(0, 229, 255, 0.08);
+      --glow-c:    0 0 18px rgba(0,229,255,0.35);
+      --glow-p:    0 0 18px rgba(255,45,111,0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      min-width: 900px;
+      min-height: 620px;
+    }
+
+    /* subtle grid bg */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(340px, 400px) 1fr;
+      gap: 16px;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .capture-panel, .library-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 0 40px rgba(0,229,255,0.05), inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+
+    .capture-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 20px;
+    }
+
+    .library-panel {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Brand row */
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .mode-mark {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #07060f;
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      padding: 5px 11px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* Fields */
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      background: var(--panel-hi);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus, input:focus {
+      border-color: var(--cyan);
+      box-shadow: var(--glow-c);
+    }
+
+    textarea { resize: vertical; padding: 11px 12px; line-height: 1.5; font-size: 0.9rem; }
+    input[type="text"] { height: 40px; padding: 0 12px; font-size: 0.9rem; }
+
+    /* Buttons */
+    .primary-button {
+      height: 42px;
+      padding: 0 20px;
+      background: var(--cyan);
+      color: #07060f;
+      border: none;
+      border-radius: 9px;
+      font-weight: 900;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: var(--glow-c);
+      transition: opacity 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .primary-button:hover { opacity: 0.85; }
+
+    .secondary-button {
+      height: 40px;
+      padding: 0 14px;
+      background: var(--panel-hi);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .secondary-button:hover { border-color: var(--cyan); }
+
+    .capture-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: stretch;
+    }
+
+    .button-row .primary-button { flex: 1; }
+
+    /* Library header */
+    .library-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .library-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--panel-hi);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 3px;
+    }
+
+    .tab-button {
+      height: 30px;
+      padding: 0 12px;
+      border: none;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .tab-button.active {
+      background: var(--cyan);
+      color: #07060f;
+    }
+
+    .search-input {
+      height: 36px;
+      padding: 0 12px;
+      background: var(--panel-hi);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font: 0.82rem 'Inter', sans-serif;
+      outline: none;
+      max-width: 180px;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus { border-color: var(--cyan); box-shadow: var(--glow-c); }
+
+    .small-button {
+      height: 32px;
+      padding: 0 10px;
+      font-size: 0.75rem;
+    }
+
+    /* Bookmark list */
+    .bookmark-list {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      overflow: auto;
+      padding: 16px 20px 20px;
+    }
+
+    .bookmark-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      background: var(--panel-hi);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      transition: border-color 0.2s;
+    }
+
+    .bookmark-card:hover { border-color: var(--border-hi); }
+
+    .bookmark-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+    }
+
+    .bookmark-text {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text);
+      max-height: 120px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .bookmark-note {
+      border-left: 2px solid var(--pink);
+      padding-left: 10px;
+      font-size: 0.84rem;
+      color: #9aa5c0;
+      white-space: pre-wrap;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .tag {
+      background: var(--tag-bg);
+      border: 1px solid rgba(0,229,255,0.2);
+      color: var(--cyan);
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .actions { display: flex; gap: 8px; }
+
+    .text-button {
+      background: transparent;
+      border: none;
+      color: var(--pink);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      border: 1px dashed var(--border);
+      border-radius: 11px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    /* Label at top */
+    .preview-label {
+      position: fixed;
+      top: 14px;
+      right: 20px;
+      z-index: 100;
+      background: var(--pink);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      padding: 5px 12px;
+      border-radius: 999px;
+      box-shadow: var(--glow-p);
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-label">PREVIEW A — Ghost Signal</div>
+
+  <main class="app-shell">
+    <section class="capture-panel">
+      <div class="brand-row">
+        <div>
+          <p class="eyebrow">Electric Sheep</p>
+          <h1>AI conversation bookmarks</h1>
+        </div>
+        <span class="mode-mark">Quick Save</span>
+      </div>
+
+      <label class="field">
+        <span>Captured text</span>
+        <textarea rows="8" placeholder="Copy an AI answer, prompt, or useful fragment…"></textarea>
+      </label>
+
+      <label class="field">
+        <span>Note</span>
+        <textarea rows="3" placeholder="Why this matters, where to reuse it…"></textarea>
+      </label>
+
+      <label class="field">
+        <span>Tags</span>
+        <input type="text" placeholder="research, prompt, bugfix" />
+      </label>
+
+      <div class="capture-grid">
+        <button class="secondary-button">Clipboard text</button>
+        <button class="secondary-button">Clipboard image</button>
+        <button class="secondary-button">Screenshot</button>
+        <button class="secondary-button">Import files</button>
+      </div>
+
+      <div class="button-row">
+        <button class="primary-button">Save bookmark</button>
+      </div>
+    </section>
+
+    <section class="library-panel">
+      <div class="library-header">
+        <div>
+          <p class="eyebrow">Library</p>
+          <h2>Saved</h2>
+        </div>
+        <div class="library-tools">
+          <div class="tabs">
+            <button class="tab-button active">Bookmarks</button>
+            <button class="tab-button">Sessions</button>
+            <button class="tab-button">Search</button>
+          </div>
+          <input class="search-input" type="search" placeholder="Search…" />
+          <button class="secondary-button small-button">Import</button>
+          <button class="secondary-button small-button">Export</button>
+        </div>
+      </div>
+
+      <div class="bookmark-list">
+        <div class="bookmark-card">
+          <div class="bookmark-meta">
+            <span>bookmark · 2 min ago</span>
+            <span>claude</span>
+          </div>
+          <p class="bookmark-text">You can use Array.from({ length: n }, (_, i) => i) to generate a range in JavaScript without any libraries. It's lazy, readable, and avoids mutation.</p>
+          <p class="bookmark-note">Good pattern for test data generation — reuse in the seed scripts.</p>
+          <div class="tag-row">
+            <span class="tag">javascript</span>
+            <span class="tag">snippet</span>
+            <span class="tag">arrays</span>
+          </div>
+          <div class="actions">
+            <button class="text-button">Delete</button>
+          </div>
+        </div>
+
+        <div class="bookmark-card">
+          <div class="bookmark-meta">
+            <span>bookmark · 1 hr ago</span>
+            <span>gpt-4</span>
+          </div>
+          <p class="bookmark-text">The key insight: semantic search finds conceptually similar content even when keywords differ, while BM25 is still better for exact phrase matches. Hybrid retrieval wins for most RAG pipelines.</p>
+          <div class="tag-row">
+            <span class="tag">rag</span>
+            <span class="tag">search</span>
+          </div>
+          <div class="actions">
+            <button class="text-button">Delete</button>
+          </div>
+        </div>
+
+        <div class="bookmark-card">
+          <div class="bookmark-meta">
+            <span>screenshot · 3 hr ago</span>
+          </div>
+          <div style="height:90px;background:rgba(0,229,255,0.04);border:1px solid var(--border);border-radius:7px;display:grid;place-items:center;color:var(--muted);font-size:0.75rem;">[ screenshot preview ]</div>
+          <div class="tag-row">
+            <span class="tag">ui</span>
+          </div>
+          <div class="actions">
+            <button class="text-button">Delete</button>
+          </div>
+        </div>
+
+        <div class="empty-state">no more items</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

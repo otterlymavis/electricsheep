@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Electric Sheep — Preview C: Radial UI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    :root {
+      --bg:     #060512;
+      --panel:  rgba(10, 9, 26, 0.97);
+      --border: rgba(0,229,255,0.18);
+      --border-hi: rgba(0,229,255,0.55);
+      --cyan:   #00e5ff;
+      --pink:   #ff2d6f;
+      --purple: #a78bfa;
+      --mint:   #5eead4;
+      --text:   #dde4f0;
+      --muted:  #55647a;
+      --glow-c: 0 0 20px rgba(0,229,255,0.4);
+      --glow-p: 0 0 20px rgba(255,45,111,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      user-select: none;
+    }
+
+    /* dot grid */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(circle, rgba(0,229,255,0.055) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    /* ambient glow blobs */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 500px 400px at 20% 80%, rgba(255,45,111,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 600px 500px at 80% 20%, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Scene ── */
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Stage ── */
+    .stage {
+      position: relative;
+      width: 480px;
+      height: 480px;
+    }
+
+    /* ── Halo ── */
+    .halo {
+      position: absolute;
+      inset: -30px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(0,229,255,0.09) 0%,
+        rgba(167,139,250,0.06) 45%,
+        transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1);   opacity: 0.7; }
+      50%       { transform: scale(1.06); opacity: 1;   }
+    }
+
+    /* ── Sheep ── */
+    .sheep-wrap {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      transition: filter 0.3s;
+    }
+
+    .sheep-wrap:hover {
+      filter: drop-shadow(0 0 14px rgba(0,229,255,0.5));
+    }
+
+    .sheep-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center;
+      pointer-events: none;
+      transition: transform 0.4s ease;
+    }
+
+    .sheep-wrap:hover img { transform: scale(1.04); }
+
+    /* ring around sheep */
+    .sheep-ring {
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0,229,255,0.25);
+      pointer-events: none;
+      transition: border-color 0.3s;
+    }
+
+    .stage.open .sheep-ring {
+      border-color: rgba(0,229,255,0.6);
+      box-shadow: 0 0 24px rgba(0,229,255,0.25), inset 0 0 24px rgba(0,229,255,0.05);
+    }
+
+    /* ── Circuit dots (hotspots on sheep) ── */
+    .dot {
+      position: absolute;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .dot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--color, var(--cyan));
+      animation: pulse-dot 2.5s ease-in-out infinite;
+    }
+
+    .dot::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color, var(--cyan));
+      opacity: 0.4;
+      animation: pulse-ring 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50%       { opacity: 1;    transform: scale(1.3); }
+    }
+
+    @keyframes pulse-ring {
+      0%       { transform: scale(1);   opacity: 0.5; }
+      70%      { transform: scale(2.4); opacity: 0;   }
+      100%     { transform: scale(2.4); opacity: 0;   }
+    }
+
+    /* dot positions on the sheep image */
+    .dot-1 { --color: var(--cyan);   top: 44%; left: 37%; animation-delay: 0s;    }
+    .dot-2 { --color: #5eead4;       top: 49%; left: 55%; animation-delay: 0.8s;  }
+    .dot-3 { --color: var(--cyan);   top: 66%; left: 40%; animation-delay: 1.5s;  }
+    .dot-4 { --color: #5eead4;       top: 66%; left: 63%; animation-delay: 0.4s;  }
+    .dot-5 { --color: var(--purple); top: 30%; left: 65%; animation-delay: 1.1s;  }
+
+    /* ── Hint ── */
+    .hint {
+      position: absolute;
+      bottom: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      transition: opacity 0.4s;
+      pointer-events: none;
+    }
+
+    .stage.open .hint { opacity: 0; }
+
+    /* ── Radial buttons ── */
+    .radial-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px 9px 12px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity   0.25s ease,
+        border-color 0.2s,
+        box-shadow 0.2s;
+      z-index: 20;
+    }
+
+    .radial-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .radial-btn:hover {
+      border-color: var(--border-hi);
+      box-shadow: var(--glow-c);
+    }
+
+    .radial-btn.active {
+      background: rgba(0,229,255,0.12);
+      border-color: var(--cyan);
+      box-shadow: var(--glow-c);
+      color: var(--cyan);
+    }
+
+    .btn-icon {
+      font-size: 1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    /* ── Menu panels (positioned + draggable via JS) ── */
+    .menu-panel {
+      position: fixed;
+      width: 280px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,229,255,0.08);
+      transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34,1.4,0.64,1);
+    }
+
+    .menu-panel.visible {
+      display: flex;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      cursor: grab;
+      user-select: none;
+    }
+
+    .panel-title:active { cursor: grabbing; }
+
+    .panel-title span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .panel-close {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.7rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .panel-close:hover {
+      border-color: var(--pink);
+      color: var(--pink);
+      background: rgba(255,45,111,0.1);
+    }
+
+    /* panel field */
+    .pfield { display: grid; gap: 5px; }
+
+    .pfield label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .pfield textarea,
+    .pfield input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font: 0.82rem 'Inter', sans-serif;
+      outline: none;
+      resize: none;
+      padding: 9px 10px;
+      line-height: 1.45;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .pfield textarea:focus,
+    .pfield input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(0,229,255,0.12);
+    }
+
+    .pfield input { height: 36px; padding: 0 10px; }
+
+    /* source buttons row */
+    .src-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .src-btn {
+      height: 34px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font: 700 0.72rem 'JetBrains Mono', monospace;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .src-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    .save-btn {
+      height: 38px;
+      background: var(--cyan);
+      border: none;
+      border-radius: 9px;
+      color: #060512;
+      font: 900 0.8rem 'Inter', sans-serif;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow: var(--glow-c);
+      transition: opacity 0.15s;
+    }
+
+    .save-btn:hover { opacity: 0.85; }
+
+    /* bookmark items in library */
+    .bk-item {
+      padding: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      display: grid;
+      gap: 5px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .bk-item:hover { border-color: rgba(0,229,255,0.35); }
+
+    .bk-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+
+    .bk-text {
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: var(--text);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .bk-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .tag {
+      background: rgba(0,229,255,0.07);
+      border: 1px solid rgba(0,229,255,0.2);
+      color: var(--cyan);
+      border-radius: 999px;
+      padding: 2px 7px;
+      font: 700 0.6rem 'JetBrains Mono', monospace;
+    }
+
+    /* search */
+    .search-results {
+      display: grid;
+      gap: 7px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    /* tools */
+    .tool-row { display: grid; gap: 7px; }
+
+    .tool-btn {
+      height: 36px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font: 700 0.78rem 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .tool-btn:hover { border-color: var(--pink); color: var(--pink); }
+
+    /* session item */
+    .sess-item {
+      padding: 9px 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .sess-item:hover { border-color: rgba(167,139,250,0.5); }
+
+    .sess-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    .sess-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+
+    /* preview badge */
+    .badge {
+      position: fixed;
+      top: 14px; right: 18px;
+      background: var(--pink);
+      color: #fff;
+      font: 900 0.65rem 'JetBrains Mono', monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 999px;
+      box-shadow: var(--glow-p);
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+<div class="badge">PREVIEW C — Radial UI</div>
+
+<div class="scene">
+  <div class="stage" id="stage">
+
+    <!-- ambient halo -->
+    <div class="halo"></div>
+
+    <!-- sheep -->
+    <div class="sheep-wrap" id="sheepWrap">
+      <img src="./image.png" alt="Electric Sheep" draggable="false" />
+    </div>
+    <div class="sheep-ring"></div>
+
+    <!-- circuit hotspot dots -->
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
+    <div class="dot dot-4"></div>
+    <div class="dot dot-5"></div>
+
+    <p class="hint">click the sheep to explore</p>
+
+    <!-- ── Radial buttons (JS positions these) ── -->
+
+    <!-- 0: Save (top) -->
+    <div class="radial-btn" data-menu="save" data-idx="0">
+      <span class="btn-icon">⊕</span>
+      <span>Save</span>
+      <div class="menu-panel" id="menu-save">
+        <div class="panel-title"><span>Quick Save</span><button class="panel-close">✕</button></div>
+        <div class="pfield">
+          <label>Captured text</label>
+          <textarea rows="4" placeholder="Paste an AI snippet, prompt, or answer…"></textarea>
+        </div>
+        <div class="pfield">
+          <label>Note</label>
+          <textarea rows="2" placeholder="Why this matters…"></textarea>
+        </div>
+        <div class="pfield">
+          <label>Tags</label>
+          <input type="text" placeholder="prompt, bugfix, research" />
+        </div>
+        <div class="src-row">
+          <button class="src-btn">Clipboard text</button>
+          <button class="src-btn">Clipboard img</button>
+          <button class="src-btn">Screenshot</button>
+          <button class="src-btn">Import file</button>
+        </div>
+        <button class="save-btn">Save bookmark</button>
+      </div>
+    </div>
+
+    <!-- 1: Library (top-right) -->
+    <div class="radial-btn" data-menu="library" data-idx="1">
+      <span class="btn-icon">◈</span>
+      <span>Library</span>
+      <div class="menu-panel" id="menu-library">
+        <div class="panel-title"><span>Bookmarks</span><button class="panel-close">✕</button></div>
+        <div class="bk-item">
+          <div class="bk-meta">bookmark · 2 min ago</div>
+          <div class="bk-text">Array.from({ length: n }, (_, i) => i) generates a range without mutation. Clean for test data.</div>
+          <div class="bk-tags"><span class="tag">js</span><span class="tag">snippet</span></div>
+        </div>
+        <div class="bk-item">
+          <div class="bk-meta">bookmark · 1 hr ago</div>
+          <div class="bk-text">Hybrid retrieval (BM25 + semantic) wins for most RAG pipelines. Semantic alone misses exact phrase matches.</div>
+          <div class="bk-tags"><span class="tag">rag</span><span class="tag">search</span></div>
+        </div>
+        <div class="bk-item">
+          <div class="bk-meta">screenshot · 3 hr ago</div>
+          <div class="bk-text">UI mockup for the new dashboard layout — grid variant.</div>
+          <div class="bk-tags"><span class="tag">ui</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2: Sessions (bottom-right) -->
+    <div class="radial-btn" data-menu="sessions" data-idx="2">
+      <span class="btn-icon">◉</span>
+      <span>Sessions</span>
+      <div class="menu-panel" id="menu-sessions">
+        <div class="panel-title"><span>Tracked Sessions</span><button class="panel-close">✕</button></div>
+        <div class="sess-item">
+          <div class="sess-name">claude · 2026-06-04</div>
+          <div class="sess-meta">38 min · wrap-up ready</div>
+        </div>
+        <div class="sess-item">
+          <div class="sess-name">zsh · 2026-06-03</div>
+          <div class="sess-meta">12 min · transcript.txt</div>
+        </div>
+        <div class="sess-item">
+          <div class="sess-name">codex · 2026-06-02</div>
+          <div class="sess-meta">1 hr 4 min · wrap-up ready</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: Search (bottom-left) -->
+    <div class="radial-btn" data-menu="search" data-idx="3">
+      <span class="btn-icon">◎</span>
+      <span>Search</span>
+      <div class="menu-panel" id="menu-search">
+        <div class="panel-title"><span>Search</span><button class="panel-close">✕</button></div>
+        <div class="pfield">
+          <input type="search" placeholder="Search bookmarks, sessions, OCR…" />
+        </div>
+        <div class="search-results">
+          <div class="bk-item">
+            <div class="bk-meta">bookmark match</div>
+            <div class="bk-text">…semantic search finds conceptually similar content even when keywords differ…</div>
+          </div>
+          <div class="bk-item">
+            <div class="bk-meta">session match</div>
+            <div class="bk-text">…claude session 2026-06-04 — transcript mentions docker bug…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4: Tools (top-left) -->
+    <div class="radial-btn" data-menu="tools" data-idx="4">
+      <span class="btn-icon">⬡</span>
+      <span>Tools</span>
+      <div class="menu-panel" id="menu-tools">
+        <div class="panel-title"><span>Tools</span><button class="panel-close">✕</button></div>
+        <div class="tool-row">
+          <button class="tool-btn">↗ Export archive</button>
+          <button class="tool-btn">↙ Import archive</button>
+          <button class="tool-btn">◎ OCR backfill</button>
+          <button class="tool-btn">⊡ Doctor check</button>
+          <button class="tool-btn">✕ Delete items</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const RADIUS   = 280;
+  const PANEL_W  = 280;
+  const GAP      = 14;
+  const stage     = document.getElementById('stage');
+  const sheepWrap = document.getElementById('sheepWrap');
+  const angles    = [-90, -18, 54, 126, 198].map(d => d * Math.PI / 180);
+  const btns      = [...document.querySelectorAll('.radial-btn')];
+
+  let zTop   = 100;
+  let isOpen = false;
+
+  // ── Move all panels to <body> so they're free of transformed parents ──
+  const panels = btns.map((btn, i) => {
+    const panel = btn.querySelector('.menu-panel');
+    document.body.appendChild(panel);
+
+    // Fade-in animation helpers
+    panel.style.opacity   = '0';
+    panel.style.transform = 'scale(0.9)';
+
+    // X button closes only this panel
+    panel.querySelector('.panel-close').addEventListener('click', e => {
+      e.stopPropagation();
+      hidePanel(i);
+    });
+
+    // Click anywhere on panel → bring to front
+    panel.addEventListener('mousedown', () => {
+      panel.style.zIndex = ++zTop;
+    });
+
+    makeDraggable(panel);
+    return panel;
+  });
+
+  // ── Radial button init: place at radial position, scaled to 0 ──
+  btns.forEach((btn, i) => {
+    const tx = Math.cos(angles[i]) * RADIUS;
+    const ty = Math.sin(angles[i]) * RADIUS;
+    btn.dataset.tx = tx;
+    btn.dataset.ty = ty;
+    btn.style.transition = 'none';
+    btn.style.transform  = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`;
+  });
+
+  // ── Show / hide individual panels ──
+  function showPanel(i) {
+    const btn   = btns[i];
+    const panel = panels[i];
+
+    if (panel.classList.contains('visible')) {
+      panel.style.zIndex = ++zTop; // already open → just raise
+      return;
+    }
+
+    // Compute initial position near the button
+    const rect   = btn.getBoundingClientRect();
+    const isLeft = i >= 3;
+    const isTop  = i === 0;
+    let left, top;
+
+    if (isTop) {
+      left = rect.right + GAP;
+      top  = rect.top;
+    } else if (isLeft) {
+      left = rect.left - PANEL_W - GAP;
+      top  = rect.top - 20;
+    } else {
+      left = rect.right + GAP;
+      top  = rect.top - 20;
+    }
+
+    // Clamp within viewport
+    left = Math.max(8, Math.min(left, window.innerWidth  - PANEL_W - 8));
+    top  = Math.max(8, Math.min(top,  window.innerHeight - 60));
+
+    panel.style.left    = left + 'px';
+    panel.style.top     = top  + 'px';
+    panel.style.zIndex  = ++zTop;
+    panel.style.opacity = '0';
+    panel.style.transform = 'scale(0.9)';
+    panel.classList.add('visible');
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      panel.style.transition = 'opacity 0.2s ease, transform 0.25s cubic-bezier(0.34,1.4,0.64,1)';
+      panel.style.opacity    = '1';
+      panel.style.transform  = 'scale(1)';
+    }));
+
+    btn.classList.add('active');
+  }
+
+  function hidePanel(i) {
+    const panel = panels[i];
+    panel.style.transition = 'opacity 0.18s ease, transform 0.2s ease';
+    panel.style.opacity    = '0';
+    panel.style.transform  = 'scale(0.9)';
+    setTimeout(() => panel.classList.remove('visible'), 200);
+    btns[i].classList.remove('active');
+  }
+
+  // ── Drag-to-reposition ──
+  function makeDraggable(panel) {
+    const handle = panel.querySelector('.panel-title');
+    let dragging = false, ox = 0, oy = 0;
+
+    handle.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('panel-close')) return;
+      dragging = true;
+      ox = e.clientX - parseInt(panel.style.left);
+      oy = e.clientY - parseInt(panel.style.top);
+      handle.style.cursor = 'grabbing';
+      panel.style.zIndex  = ++zTop;
+      panel.style.transition = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      panel.style.left = (e.clientX - ox) + 'px';
+      panel.style.top  = (e.clientY - oy) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      handle.style.cursor = 'grab';
+    });
+  }
+
+  // ── Open / close radial buttons ──
+  function openButtons() {
+    isOpen = true;
+    stage.classList.add('open');
+    btns.forEach((btn, i) => {
+      const tx = parseFloat(btn.dataset.tx);
+      const ty = parseFloat(btn.dataset.ty);
+      setTimeout(() => {
+        btn.style.transition =
+          `transform 0.45s cubic-bezier(0.34,1.56,0.64,1) ${i*40}ms,
+           opacity 0.25s ease ${i*40}ms,
+           border-color 0.2s, box-shadow 0.2s`;
+        btn.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1)`;
+        btn.classList.add('visible');
+      }, 0);
+    });
+  }
+
+  function closeButtons() {
+    isOpen = false;
+    stage.classList.remove('open');
+    btns.forEach((btn, i) => {
+      const tx = parseFloat(btn.dataset.tx);
+      const ty = parseFloat(btn.dataset.ty);
+      const delay = (btns.length - 1 - i) * 30;
+      btn.style.transition =
+        `transform 0.3s cubic-bezier(0.55,0,1,0.45) ${delay}ms,
+         opacity 0.2s ease ${delay}ms,
+         border-color 0.2s, box-shadow 0.2s`;
+      btn.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`;
+      btn.classList.remove('visible');
+    });
+  }
+
+  // ── Wire up events ──
+  sheepWrap.addEventListener('click', e => {
+    e.stopPropagation();
+    isOpen ? closeButtons() : openButtons();
+  });
+
+  btns.forEach((btn, i) => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!isOpen) return;
+      showPanel(i);
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeButtons();
+  });
+</script>
+</body>
+</html>
