@@ -1,81 +1,281 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Electric Sheep</title>
-    <link rel="stylesheet" href="./src/styles.css" />
-  </head>
-  <body>
-    <main class="app-shell">
-      <section class="capture-panel" aria-labelledby="capture-title">
-        <div class="brand-row">
-          <div>
-            <p class="eyebrow">Electric Sheep</p>
-            <h1 id="capture-title">AI conversation bookmarks</h1>
-          </div>
-          <span class="mode-mark">Quick Save</span>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electric Sheep</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
 
-        <label class="field">
-          <span>Captured text</span>
-          <textarea id="captureText" rows="9" placeholder="Copy an AI answer, prompt, or useful fragment, then press Cmd+Shift+B."></textarea>
-        </label>
+<div class="scene">
+  <div class="stage" id="stage">
 
-        <label class="field">
-          <span>Note</span>
-          <textarea id="noteText" rows="3" placeholder="Why this matters, where you might reuse it, or what to ask next."></textarea>
-        </label>
+    <div class="halo"></div>
 
-        <label class="field">
-          <span>Tags</span>
-          <input id="tagInput" type="text" placeholder="research, prompt, bugfix" />
-        </label>
+    <div class="sheep-wrap" id="sheepWrap">
+      <img src="./image.png" alt="Electric Sheep" draggable="false" />
+    </div>
+    <div class="sheep-ring"></div>
 
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
+    <div class="dot dot-4"></div>
+    <div class="dot dot-5"></div>
+
+    <p class="hint">click the sheep to explore</p>
+
+    <!-- 0: Save (top) -->
+    <div class="radial-btn" data-idx="0">
+      <span class="btn-icon">⊕</span>
+      <span>Save</span>
+      <div class="menu-panel">
+        <div class="panel-title"><span>Quick Save</span><button class="panel-close">✕</button></div>
         <div id="attachmentPreview" class="attachment-preview hidden">
           <div class="preview-header">
-            <span>Attachments</span>
+            <span class="field-label">Attachments</span>
             <button id="clearAttachments" class="ghost-button">Clear</button>
           </div>
           <div id="attachmentList" class="attachment-list"></div>
         </div>
-
-        <div class="capture-grid">
-          <button id="refreshClipboard" class="secondary-button">Clipboard text</button>
-          <button id="captureClipboardImage" class="secondary-button">Clipboard image</button>
-          <button id="captureScreenshot" class="secondary-button">Screenshot</button>
-          <button id="importFiles" class="secondary-button">Import files</button>
+        <label class="field">
+          <span class="field-label">Captured text</span>
+          <textarea id="captureText" rows="5" placeholder="Copy an AI answer, prompt, or useful fragment, then press Cmd+Shift+B."></textarea>
+        </label>
+        <label class="field">
+          <span class="field-label">Note</span>
+          <textarea id="noteText" rows="2" placeholder="Why this matters, where you might reuse it."></textarea>
+        </label>
+        <label class="field">
+          <span class="field-label">Tags</span>
+          <input id="tagInput" type="text" placeholder="research, prompt, bugfix" />
+        </label>
+        <div class="src-row">
+          <button id="refreshClipboard" class="src-btn">Clipboard text</button>
+          <button id="captureClipboardImage" class="src-btn">Clipboard img</button>
+          <button id="captureScreenshot" class="src-btn">Screenshot</button>
+          <button id="importFiles" class="src-btn">Import files</button>
         </div>
+        <button id="saveBookmark" class="save-btn">Save bookmark</button>
+      </div>
+    </div>
 
-        <div class="button-row">
-          <button id="saveBookmark" class="primary-button">Save bookmark</button>
+    <!-- 1: Library (top-right) -->
+    <div class="radial-btn" data-idx="1">
+      <span class="btn-icon">◈</span>
+      <span>Library</span>
+      <div class="menu-panel panel-wide">
+        <div class="panel-title"><span>Bookmarks</span><button class="panel-close">✕</button></div>
+        <div id="bookmarkList" class="item-list" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- 2: Sessions (bottom-right) -->
+    <div class="radial-btn" data-idx="2">
+      <span class="btn-icon">◉</span>
+      <span>Sessions</span>
+      <div class="menu-panel panel-wide">
+        <div class="panel-title"><span>Sessions</span><button class="panel-close">✕</button></div>
+        <div id="sessionList" class="item-list" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- 3: Search (bottom-left) -->
+    <div class="radial-btn" data-idx="3">
+      <span class="btn-icon">◎</span>
+      <span>Search</span>
+      <div class="menu-panel panel-wide">
+        <div class="panel-title"><span>Search</span><button class="panel-close">✕</button></div>
+        <div class="field">
+          <input id="searchInput" class="search-field" type="search" placeholder="Search bookmarks, sessions, OCR…" />
         </div>
-      </section>
+        <div id="searchResults" class="item-list" aria-live="polite"></div>
+      </div>
+    </div>
 
-      <section class="library-panel" aria-labelledby="library-title">
-        <div class="library-header">
-          <div>
-            <p class="eyebrow">Library</p>
-            <h2 id="library-title">Saved</h2>
-          </div>
-          <div class="library-tools">
-            <div class="tabs" role="tablist" aria-label="Library views">
-              <button id="bookmarksTab" class="tab-button active" type="button">Bookmarks</button>
-              <button id="sessionsTab" class="tab-button" type="button">Sessions</button>
-              <button id="searchTab" class="tab-button" type="button">Search</button>
-            </div>
-            <input id="searchInput" class="search-input" type="search" placeholder="Search library" />
-            <button id="importArchive" class="secondary-button small-button" type="button">Import</button>
-            <button id="exportArchive" class="secondary-button small-button" type="button">Export</button>
-          </div>
+    <!-- 4: Tools (top-left) -->
+    <div class="radial-btn" data-idx="4">
+      <span class="btn-icon">⬡</span>
+      <span>Tools</span>
+      <div class="menu-panel">
+        <div class="panel-title"><span>Tools</span><button class="panel-close">✕</button></div>
+        <div class="tool-row">
+          <button id="exportArchive" class="tool-btn">↗ Export archive</button>
+          <button id="importArchive" class="tool-btn">↙ Import archive</button>
         </div>
+        <p id="toolStatus" class="tool-status hidden"></p>
+      </div>
+    </div>
 
-        <div id="bookmarkList" class="bookmark-list" aria-live="polite"></div>
-        <div id="sessionList" class="bookmark-list hidden" aria-live="polite"></div>
-        <div id="searchResults" class="bookmark-list hidden" aria-live="polite"></div>
-      </section>
-    </main>
+  </div>
+</div>
 
-    <script src="./src/renderer.js"></script>
-  </body>
+<script src="./src/renderer.js"></script>
+<script>
+(function () {
+  const RADIUS = 280;
+  const GAP    = 14;
+  const stage  = document.getElementById('stage');
+  const sheep  = document.getElementById('sheepWrap');
+  const angles = [-90, -18, 54, 126, 198].map(d => d * Math.PI / 180);
+  const btns   = [...document.querySelectorAll('.radial-btn')];
+
+  let zTop   = 100;
+  let isOpen = false;
+
+  // Callbacks when each panel opens
+  const onOpen = {
+    1: () => window.electricSheepUI?.loadBookmarks(),
+    2: () => window.electricSheepUI?.loadSessions(),
+    3: () => setTimeout(() => document.querySelector('#searchInput')?.focus(), 50)
+  };
+
+  // Move each panel to <body> so it escapes transformed parents
+  const panels = btns.map((btn, i) => {
+    const panel = btn.querySelector('.menu-panel');
+    document.body.appendChild(panel);
+
+    const pw = panel.classList.contains('panel-wide') ? 360 : 300;
+    panel.style.cssText += `width:${pw}px;position:fixed;display:none;opacity:0;transform:scale(0.9);z-index:${zTop};transition:opacity 0.2s ease,transform 0.25s cubic-bezier(0.34,1.4,0.64,1);`;
+
+    panel.querySelector('.panel-close').addEventListener('click', e => {
+      e.stopPropagation();
+      hidePanel(i);
+    });
+
+    panel.addEventListener('mousedown', () => { panel.style.zIndex = ++zTop; });
+
+    makeDraggable(panel);
+    return panel;
+  });
+
+  // Init: buttons at radial positions, scaled to 0 (never cross sheep)
+  btns.forEach((btn, i) => {
+    const tx = Math.cos(angles[i]) * RADIUS;
+    const ty = Math.sin(angles[i]) * RADIUS;
+    btn.dataset.tx = tx;
+    btn.dataset.ty = ty;
+    btn.style.transition = 'none';
+    btn.style.transform  = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`;
+  });
+
+  function showPanel(i) {
+    const btn   = btns[i];
+    const panel = panels[i];
+    const pw    = parseInt(panel.style.width);
+
+    if (panel.classList.contains('visible')) { panel.style.zIndex = ++zTop; return; }
+
+    const rect   = btn.getBoundingClientRect();
+    const isLeft = i >= 3;
+    const isTop  = i === 0;
+    let left = isLeft ? rect.left - pw - GAP : rect.right + GAP;
+    let top  = isTop  ? rect.top             : rect.top - 20;
+
+    left = Math.max(8, Math.min(left, window.innerWidth  - pw - 8));
+    top  = Math.max(8, Math.min(top,  window.innerHeight - 60));
+
+    panel.style.left      = left + 'px';
+    panel.style.top       = top  + 'px';
+    panel.style.zIndex    = ++zTop;
+    panel.style.opacity   = '0';
+    panel.style.transform = 'scale(0.9)';
+    panel.style.display   = 'flex';
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      panel.style.transition = 'opacity 0.2s ease, transform 0.25s cubic-bezier(0.34,1.4,0.64,1)';
+      panel.style.opacity    = '1';
+      panel.style.transform  = 'scale(1)';
+    }));
+
+    btn.classList.add('active');
+    onOpen[i]?.();
+  }
+
+  function hidePanel(i) {
+    const panel = panels[i];
+    panel.style.transition = 'opacity 0.18s ease, transform 0.2s ease';
+    panel.style.opacity    = '0';
+    panel.style.transform  = 'scale(0.9)';
+    setTimeout(() => { panel.style.display = 'none'; }, 200);
+    btns[i].classList.remove('active');
+  }
+
+  function makeDraggable(panel) {
+    const handle = panel.querySelector('.panel-title');
+    let drag = false, ox = 0, oy = 0;
+
+    handle.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('panel-close')) return;
+      drag = true;
+      ox = e.clientX - parseInt(panel.style.left);
+      oy = e.clientY - parseInt(panel.style.top);
+      handle.style.cursor    = 'grabbing';
+      panel.style.transition = 'none';
+      panel.style.zIndex     = ++zTop;
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!drag) return;
+      panel.style.left = (e.clientX - ox) + 'px';
+      panel.style.top  = (e.clientY - oy) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!drag) return;
+      drag = false;
+      handle.style.cursor = 'grab';
+    });
+  }
+
+  sheep.addEventListener('click', e => {
+    e.stopPropagation();
+    isOpen ? closeButtons() : openButtons();
+  });
+
+  function openButtons() {
+    isOpen = true;
+    stage.classList.add('open');
+    btns.forEach((btn, i) => {
+      const tx = parseFloat(btn.dataset.tx);
+      const ty = parseFloat(btn.dataset.ty);
+      setTimeout(() => {
+        btn.style.transition =
+          `transform 0.45s cubic-bezier(0.34,1.56,0.64,1) ${i*40}ms,
+           opacity 0.25s ease ${i*40}ms`;
+        btn.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1)`;
+        btn.classList.add('visible');
+      }, 0);
+    });
+  }
+
+  function closeButtons() {
+    isOpen = false;
+    stage.classList.remove('open');
+    btns.forEach((btn, i) => {
+      const tx    = parseFloat(btn.dataset.tx);
+      const ty    = parseFloat(btn.dataset.ty);
+      const delay = (btns.length - 1 - i) * 30;
+      btn.style.transition =
+        `transform 0.3s cubic-bezier(0.55,0,1,0.45) ${delay}ms,
+         opacity 0.2s ease ${delay}ms`;
+      btn.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`;
+      btn.classList.remove('visible');
+    });
+  }
+
+  btns.forEach((btn, i) => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!isOpen) return;
+      showPanel(i);
+    });
+  });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeButtons(); });
+})();
+</script>
+</body>
 </html>

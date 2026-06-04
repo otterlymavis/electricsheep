@@ -12,12 +12,12 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1180,
-    height: 760,
-    minWidth: 920,
-    minHeight: 620,
+    width: 1280,
+    height: 860,
+    minWidth: 800,
+    minHeight: 600,
     title: "Electric Sheep",
-    backgroundColor: "#f7f4ef",
+    backgroundColor: "#060512",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
