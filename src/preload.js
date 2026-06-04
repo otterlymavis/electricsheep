@@ -1,7 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electricSheep", {
-  readClipboard: () => ipcRenderer.invoke("clipboard:read"),
   readClipboardText: () => ipcRenderer.invoke("clipboard:read"),
   readClipboardImage: () => ipcRenderer.invoke("clipboard:image"),
   captureScreenshot: () => ipcRenderer.invoke("screenshot:capture"),

@@ -212,11 +212,10 @@
     if (panel.classList.contains('visible')) { panel.style.zIndex = ++zTop; return; }
 
     const rect   = btn.getBoundingClientRect();
-    const isLeft   = i >= 4;
-    const isTop    = i === 0;
-    const isBottom = i === 3;
+    const isLeft = i >= 4;
+    const isTop  = i === 0;
     let left = isLeft ? rect.left - pw - GAP : rect.right + GAP;
-    let top  = isTop  ? rect.top : isBottom ? rect.top - 20 : rect.top - 20;
+    let top  = isTop  ? rect.top : rect.top - 20;
 
     left = Math.max(8, Math.min(left, window.innerWidth  - pw - 8));
     top  = Math.max(8, Math.min(top,  window.innerHeight - 60));
