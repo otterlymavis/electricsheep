@@ -129,7 +129,7 @@ function normalizeAttachments(bookmark) {
 
 function renderBookmarks() {
   if (bookmarks.length === 0) {
-    bookmarkList.innerHTML = `<div class="empty-state">No bookmarks yet.</div>`;
+    bookmarkList.innerHTML = `<div class="empty-state">Nothing saved yet.\nUse Save to capture your first snippet.</div>`;
     return;
   }
 
@@ -160,7 +160,7 @@ function renderBookmarks() {
 
 function renderSessions() {
   if (sessions.length === 0) {
-    sessionList.innerHTML = `<div class="empty-state">No tracked sessions yet.</div>`;
+    sessionList.innerHTML = `<div class="empty-state">No sessions yet.\nRun sheep track &lt;command&gt; in your terminal to start recording.</div>`;
     return;
   }
 
