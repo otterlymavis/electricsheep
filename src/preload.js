@@ -15,6 +15,9 @@ contextBridge.exposeInMainWorld("electricSheep", {
   addBookmark: (bookmark) => ipcRenderer.invoke("bookmarks:add", bookmark),
   deleteBookmark: (id) => ipcRenderer.invoke("bookmarks:delete", id),
   deleteSession: (id) => ipcRenderer.invoke("sessions:delete", id),
+  getInfo: () => ipcRenderer.invoke("app:info"),
+  ocrBackfill: () => ipcRenderer.invoke("ocr:backfill"),
+  doctorCheck: () => ipcRenderer.invoke("doctor:check"),
   onClipboardCaptured: (callback) => {
     ipcRenderer.on("clipboard-captured", (_event, text) => callback(text));
   },

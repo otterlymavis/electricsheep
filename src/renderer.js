@@ -16,6 +16,11 @@ const saveBookmark       = document.querySelector("#saveBookmark");
 const exportArchive      = document.querySelector("#exportArchive");
 const importArchive      = document.querySelector("#importArchive");
 const toolStatus         = document.querySelector("#toolStatus");
+const settingsStatus     = document.querySelector("#settingsStatus");
+const appVersion         = document.querySelector("#appVersion");
+const storePath          = document.querySelector("#storePath");
+const ocrBackfill        = document.querySelector("#ocrBackfill");
+const doctorCheck        = document.querySelector("#doctorCheck");
 
 let bookmarks         = [];
 let sessions          = [];
@@ -225,7 +230,37 @@ async function runArchiveSearch() {
 
 // ── Expose to radial UI ───────────────────────────────────────────────────
 
-window.electricSheepUI = { loadBookmarks, loadSessions, runArchiveSearch };
+async function loadSettings() {
+  try {
+    const info = await window.electricSheep.getInfo();
+    if (appVersion) appVersion.textContent = `v${info.version}`;
+    if (storePath)  storePath.textContent  = info.storePath;
+  } catch {}
+}
+
+function showSettingsStatus(msg, isError = false) {
+  settingsStatus.textContent = msg;
+  settingsStatus.style.color = isError ? "var(--pink)" : "var(--mint)";
+  settingsStatus.classList.remove("hidden");
+}
+
+ocrBackfill?.addEventListener("click", async () => {
+  showSettingsStatus("Running OCR backfill…");
+  try {
+    const r = await window.electricSheep.ocrBackfill();
+    showSettingsStatus(`Checked ${r.checked} · updated ${r.updated} · failed ${r.failed}`);
+  } catch { showSettingsStatus("OCR backfill failed", true); }
+});
+
+doctorCheck?.addEventListener("click", async () => {
+  showSettingsStatus("Running checks…");
+  try {
+    const checks = await window.electricSheep.doctorCheck();
+    showSettingsStatus(checks.map(c => `${c.ok ? "✓" : "✗"} ${c.name}${c.detail ? " — " + c.detail : ""}`).join("\n"));
+  } catch { showSettingsStatus("Doctor check failed", true); }
+});
+
+window.electricSheepUI = { loadBookmarks, loadSessions, runArchiveSearch, loadSettings };
 
 // ── Capture panel events ──────────────────────────────────────────────────
 

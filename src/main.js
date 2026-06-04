@@ -6,7 +6,7 @@ const { pathToFileURL } = require("node:url");
 const { exportArchive, importArchive } = require("./export");
 const { readImageText } = require("./ocr");
 const { searchArchive } = require("./search");
-const { deleteBookmark, deleteSession, ensureStore, getStorePaths, isInsideBaseDir, readBookmarks, readSessions, writeBookmarks } = require("./store");
+const { deleteBookmark, deleteSession, ensureStore, getStorePaths, isInsideBaseDir, readBookmarks, readSessions, updateBookmarks, writeBookmarks } = require("./store");
 
 let mainWindow;
 
@@ -248,6 +248,66 @@ ipcMain.handle("bookmarks:add", async (_event, bookmark) => {
 ipcMain.handle("bookmarks:delete", async (_event, id) => {
   await deleteBookmark(id);
   return readBookmarks();
+});
+
+ipcMain.handle("app:info", () => ({
+  version: app.getVersion(),
+  storePath: getStorePaths().baseDir
+}));
+
+ipcMain.handle("ocr:backfill", async () => {
+  let checked = 0, updated = 0, failed = 0;
+  await updateBookmarks(async (bookmarks) => {
+    for (const bookmark of bookmarks) {
+      const attachments = Array.isArray(bookmark.attachments) ? bookmark.attachments : [];
+      if (bookmark.screenshotPath && !attachments.some(a => a.path === bookmark.screenshotPath)) {
+        attachments.push({ id: `${bookmark.id}-ss`, type: "image", path: bookmark.screenshotPath, originalName: "Screenshot", extractedText: "", ocrStatus: "unknown", createdAt: bookmark.createdAt });
+        bookmark.attachments = attachments;
+      }
+      for (const a of attachments) {
+        if (a.type !== "image" || a.ocrStatus === "processed" || a.ocrStatus === "empty") continue;
+        checked++;
+        const ocr = await readImageText(a.path);
+        a.extractedText = ocr.text;
+        a.ocrStatus     = ocr.status;
+        if (ocr.status === "failed") failed++; else updated++;
+      }
+    }
+    return bookmarks;
+  });
+  return { checked, updated, failed };
+});
+
+ipcMain.handle("doctor:check", async () => {
+  const pty = require("node-pty");
+  const checks = [
+    { name: "Store", ok: true, detail: getStorePaths().baseDir }
+  ];
+
+  for (const mod of ["electron", "node-pty"]) {
+    try { require.resolve(mod); checks.push({ name: mod, ok: true }); }
+    catch (e) { checks.push({ name: mod, ok: false, detail: e.message }); }
+  }
+
+  await new Promise(resolve => {
+    try {
+      const t = pty.spawn("/bin/echo", ["ok"], { name: "xterm", cols: 80, rows: 24, cwd: process.cwd(), env: process.env });
+      let out = "";
+      t.onData(d => { out += d; });
+      t.onExit(({ exitCode }) => {
+        checks.push({ name: "PTY spawn", ok: exitCode === 0 && out.includes("ok") });
+        resolve();
+      });
+    } catch (e) {
+      checks.push({ name: "PTY spawn", ok: false, detail: e.message });
+      resolve();
+    }
+  });
+
+  const swift = require("node:child_process").spawnSync("swift", ["--version"], { encoding: "utf8" });
+  checks.push({ name: "Swift OCR", ok: swift.status === 0, detail: swift.status === 0 ? swift.stdout.split("\n")[0] : swift.stderr.trim() });
+
+  return checks;
 });
 
 ipcMain.handle("sessions:delete", async (_event, id) => {

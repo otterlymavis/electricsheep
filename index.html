@@ -94,7 +94,7 @@
       </div>
     </div>
 
-    <!-- 4: Tools (top-left) -->
+    <!-- 4: Tools (bottom-left) -->
     <div class="radial-btn" data-idx="4">
       <span class="btn-icon">⬡</span>
       <span>Tools</span>
@@ -108,6 +108,49 @@
       </div>
     </div>
 
+    <!-- 5: Settings (top-left) -->
+    <div class="radial-btn" data-idx="5">
+      <span class="btn-icon">⚙</span>
+      <span>Settings</span>
+      <div class="menu-panel">
+        <div class="panel-title"><span>Settings</span><button class="panel-close">✕</button></div>
+
+        <div class="settings-section">
+          <div class="settings-label">About</div>
+          <div class="settings-row">
+            <span>Electric Sheep</span>
+            <span id="appVersion" class="settings-value">—</span>
+          </div>
+          <div class="settings-row">
+            <span>Store</span>
+            <span id="storePath" class="settings-value mono">—</span>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Shortcuts</div>
+          <div class="settings-row">
+            <span>Open + clipboard</span>
+            <kbd>⌘⇧B</kbd>
+          </div>
+          <div class="settings-row">
+            <span>Screenshot + open</span>
+            <kbd>⌘⇧S</kbd>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Maintenance</div>
+          <div class="tool-row">
+            <button id="ocrBackfill" class="tool-btn">◎ OCR backfill</button>
+            <button id="doctorCheck" class="tool-btn">⊡ Doctor check</button>
+          </div>
+        </div>
+
+        <p id="settingsStatus" class="tool-status hidden"></p>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -118,7 +161,7 @@
   const GAP    = 14;
   const stage  = document.getElementById('stage');
   const sheep  = document.getElementById('sheepWrap');
-  const angles = [-90, -18, 54, 126, 198].map(d => d * Math.PI / 180);
+  const angles = [-90, -30, 30, 90, 150, 210].map(d => d * Math.PI / 180);
   const btns   = [...document.querySelectorAll('.radial-btn')];
 
   let zTop   = 100;
@@ -128,7 +171,8 @@
   const onOpen = {
     1: () => window.electricSheepUI?.loadBookmarks(),
     2: () => window.electricSheepUI?.loadSessions(),
-    3: () => setTimeout(() => document.querySelector('#searchInput')?.focus(), 50)
+    3: () => setTimeout(() => document.querySelector('#searchInput')?.focus(), 50),
+    5: () => window.electricSheepUI?.loadSettings()
   };
 
   // Move each panel to <body> so it escapes transformed parents
@@ -168,10 +212,11 @@
     if (panel.classList.contains('visible')) { panel.style.zIndex = ++zTop; return; }
 
     const rect   = btn.getBoundingClientRect();
-    const isLeft = i >= 3;
-    const isTop  = i === 0;
+    const isLeft   = i >= 4;
+    const isTop    = i === 0;
+    const isBottom = i === 3;
     let left = isLeft ? rect.left - pw - GAP : rect.right + GAP;
-    let top  = isTop  ? rect.top             : rect.top - 20;
+    let top  = isTop  ? rect.top : isBottom ? rect.top - 20 : rect.top - 20;
 
     left = Math.max(8, Math.min(left, window.innerWidth  - pw - 8));
     top  = Math.max(8, Math.min(top,  window.innerHeight - 60));
