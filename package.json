@@ -1,0 +1,67 @@
+{
+  "name": "electricsheep",
+  "version": "0.1.0",
+  "description": "A local-first bookmarker for AI conversations, clipboard snippets, notes, and screenshots.",
+  "main": "src/main.js",
+  "build": {
+    "appId": "local.electricsheep.app",
+    "productName": "Electric Sheep",
+    "asar": false,
+    "npmRebuild": false,
+    "files": [
+      "index.html",
+      "src/**/*",
+      "scripts/ocr.swift",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "identity": null,
+      "target": [
+        "dir",
+        "dmg"
+      ]
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "target": [
+        "zip"
+      ]
+    },
+    "directories": {
+      "output": "release"
+    }
+  },
+  "bin": {
+    "sheep": "bin/sheep.js"
+  },
+  "scripts": {
+    "start": "electron .",
+    "sheep": "node bin/sheep.js",
+    "test": "node scripts/smoke-test.js",
+    "open": "npm start",
+    "open:app": "open \"release/mac-arm64/Electric Sheep.app\"",
+    "pack": "electron-builder --dir",
+    "pack:win": "electron-builder --win --x64 --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win --x64"
+  },
+  "keywords": [
+    "ai",
+    "bookmarks",
+    "clipboard",
+    "screenshots",
+    "notes"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^42.3.3",
+    "electron-builder": "^26.8.1"
+  },
+  "dependencies": {
+    "node-pty": "^1.1.0"
+  }
+}

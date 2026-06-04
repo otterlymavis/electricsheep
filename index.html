@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electric Sheep</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="capture-panel" aria-labelledby="capture-title">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">Electric Sheep</p>
+            <h1 id="capture-title">AI conversation bookmarks</h1>
+          </div>
+          <span class="mode-mark">Quick Save</span>
+        </div>
+
+        <label class="field">
+          <span>Captured text</span>
+          <textarea id="captureText" rows="9" placeholder="Copy an AI answer, prompt, or useful fragment, then press Cmd+Shift+B."></textarea>
+        </label>
+
+        <label class="field">
+          <span>Note</span>
+          <textarea id="noteText" rows="3" placeholder="Why this matters, where you might reuse it, or what to ask next."></textarea>
+        </label>
+
+        <label class="field">
+          <span>Tags</span>
+          <input id="tagInput" type="text" placeholder="research, prompt, bugfix" />
+        </label>
+
+        <div id="attachmentPreview" class="attachment-preview hidden">
+          <div class="preview-header">
+            <span>Attachments</span>
+            <button id="clearAttachments" class="ghost-button">Clear</button>
+          </div>
+          <div id="attachmentList" class="attachment-list"></div>
+        </div>
+
+        <div class="capture-grid">
+          <button id="refreshClipboard" class="secondary-button">Clipboard text</button>
+          <button id="captureClipboardImage" class="secondary-button">Clipboard image</button>
+          <button id="captureScreenshot" class="secondary-button">Screenshot</button>
+          <button id="importFiles" class="secondary-button">Import files</button>
+        </div>
+
+        <div class="button-row">
+          <button id="saveBookmark" class="primary-button">Save bookmark</button>
+        </div>
+      </section>
+
+      <section class="library-panel" aria-labelledby="library-title">
+        <div class="library-header">
+          <div>
+            <p class="eyebrow">Library</p>
+            <h2 id="library-title">Saved</h2>
+          </div>
+          <div class="library-tools">
+            <div class="tabs" role="tablist" aria-label="Library views">
+              <button id="bookmarksTab" class="tab-button active" type="button">Bookmarks</button>
+              <button id="sessionsTab" class="tab-button" type="button">Sessions</button>
+              <button id="searchTab" class="tab-button" type="button">Search</button>
+            </div>
+            <input id="searchInput" class="search-input" type="search" placeholder="Search library" />
+            <button id="importArchive" class="secondary-button small-button" type="button">Import</button>
+            <button id="exportArchive" class="secondary-button small-button" type="button">Export</button>
+          </div>
+        </div>
+
+        <div id="bookmarkList" class="bookmark-list" aria-live="polite"></div>
+        <div id="sessionList" class="bookmark-list hidden" aria-live="polite"></div>
+        <div id="searchResults" class="bookmark-list hidden" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="./src/renderer.js"></script>
+  </body>
+</html>
