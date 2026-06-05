@@ -9,11 +9,192 @@
 <body>
 
 <div class="scene">
+  <aside class="onboarding-panel" id="onboardingPanel" aria-label="Getting started">
+    <svg class="guide-robot-shell" viewBox="0 0 360 760" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="robotGlow" x="-35%" y="-35%" width="170%" height="170%">
+          <feGaussianBlur stdDeviation="2.4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <path class="robot-fill" d="M50 152A130 130 0 0 1 310 152V190H50V152Z" />
+      <path class="robot-line robot-head" d="M50 152A130 130 0 0 1 310 152V190H50V152Z" />
+      <line class="robot-line robot-seam" x1="50" y1="210" x2="310" y2="210" />
+      <circle class="robot-line robot-eye" cx="132" cy="128" r="18" />
+      <circle class="robot-line robot-eye-dot" cx="132" cy="128" r="8" />
+      <circle class="robot-line robot-eye" cx="228" cy="128" r="18" />
+      <circle class="robot-line robot-eye-dot" cx="228" cy="128" r="8" />
+      <path class="robot-fill" d="M50 230H310V624Q310 662 272 662H258V718Q258 748 226 748Q190 748 190 716V662H170V716Q170 748 134 748Q102 748 102 718V662H88Q50 662 50 624V230Z" />
+      <path class="robot-line robot-body" d="M50 230H310V624Q310 662 272 662H258V718Q258 748 226 748Q190 748 190 716V662H170V716Q170 748 134 748Q102 748 102 718V662H88Q50 662 50 624V230Z" />
+      <path class="robot-line robot-plug" d="M102 716H74Q62 690 38 690H16M38 690V660M38 690V720M16 668H48M16 712H48" />
+    </svg>
+    <div class="guide-panel-tools" aria-label="Guide size controls">
+      <button class="guide-tool-btn" id="guideZoomOut" type="button" aria-label="Zoom guide out">−</button>
+      <button class="guide-tool-btn" id="guideZoomIn" type="button" aria-label="Zoom guide in">+</button>
+    </div>
+    <button class="guide-drag-handle" id="guideDragHandle" type="button" aria-label="Drag guide panel">
+      <span aria-hidden="true">✥</span>
+    </button>
+    <button class="guide-resize-handle" id="guideResizeHandle" type="button" aria-label="Resize guide panel"></button>
+    <div class="guide-hero">
+      <img src="./image.png" alt="" aria-hidden="true" />
+      <div>
+        <p class="eyebrow">Local AI memory</p>
+        <h1>Electric Sheep</h1>
+      </div>
+    </div>
+
+    <nav class="guide-nav" aria-label="Steps">
+      <button class="guide-tab active" data-guide-topic="see" aria-selected="true" role="tab">
+        <span class="tab-icon">✦</span> Copy
+      </button>
+      <button class="guide-tab" data-guide-topic="keep" aria-selected="false" role="tab">
+        <span class="tab-icon">◈</span> Save
+      </button>
+      <button class="guide-tab" data-guide-topic="ask" aria-selected="false" role="tab">
+        <span class="tab-icon">◎</span> Find
+      </button>
+    </nav>
+
+    <div class="guide-map mindmap map-see" id="guideMindmap" aria-label="How Electric Sheep works">
+      <span class="mind-line line-copy" aria-hidden="true"></span>
+      <span class="mind-line line-save" aria-hidden="true"></span>
+      <span class="mind-line line-find" aria-hidden="true"></span>
+      <span class="mind-token token-copy" aria-hidden="true">✦</span>
+      <span class="mind-token token-save" aria-hidden="true">◈</span>
+      <span class="mind-token token-find" aria-hidden="true">◎</span>
+
+      <button class="mind-center" id="mindCenter" type="button" aria-label="Show current step">
+        <img src="./image.png" alt="" />
+        <span>memory</span>
+      </button>
+
+      <button class="map-step mind-node mind-copy active" data-guide-topic="see" type="button">
+        <span class="map-bubble">✦</span>
+        <span>Copy</span>
+      </button>
+      <button class="map-step mind-node mind-save" data-guide-topic="keep" type="button">
+        <span class="map-bubble">◈</span>
+        <span>Save</span>
+      </button>
+      <button class="map-step mind-node mind-find" data-guide-topic="ask" type="button">
+        <span class="map-bubble">◎</span>
+        <span>Find</span>
+      </button>
+    </div>
+
+    <div class="guide-sandbox-viewport">
+      <div class="sandbox-pane active" id="pane-see">
+        <div class="toy-flow">
+          <span class="idea-token" aria-hidden="true">✦</span>
+          <div class="toy-window">
+            <div class="toy-window-top"><span></span><span></span><span></span></div>
+            <div class="toy-answer">
+              <span class="toy-spark">AI</span>
+              <div class="toy-lines">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+          <div class="toy-sheep-pocket">
+            <img src="./image.png" alt="" aria-hidden="true" />
+            <span class="pocket-glow">memory</span>
+          </div>
+        </div>
+        <button class="sandbox-btn" id="btnCopySnippet">
+          <span class="btn-icon">✦</span> Copy this
+        </button>
+      </div>
+
+      <div class="sandbox-pane" id="pane-keep">
+        <div class="memory-shelf">
+          <div class="mock-card">
+            <div class="mock-card-header">
+              <span class="mock-card-icon">◈</span>
+              <span class="mock-card-title">Memory card</span>
+            </div>
+            <div class="mock-card-body-lines">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="mock-card-tags" id="mockCardTags">
+            </div>
+          </div>
+          <div class="shelf-slots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="sandbox-tag-selector">
+          <p class="sandbox-label">Add stickers</p>
+          <div class="sandbox-tags-row">
+            <button class="tag-pill" data-tag="code">⌘ code</button>
+            <button class="tag-pill" data-tag="helper">✚ helper</button>
+            <button class="tag-pill" data-tag="js">JS</button>
+          </div>
+        </div>
+        <button class="sandbox-btn" id="btnKeepBookmark" disabled>
+          <span class="btn-icon">◈</span> Put away
+        </button>
+      </div>
+
+      <div class="sandbox-pane" id="pane-ask">
+        <div class="finder-board">
+          <div class="finder-picture" aria-hidden="true">
+            <span class="finder-glass">◎</span>
+            <span class="finder-beam"></span>
+            <span class="finder-card">◈</span>
+          </div>
+          <div class="mock-search-bar">
+            <span class="search-icon">◎</span>
+            <input type="text" class="mock-search-input" id="mockSearchInput" placeholder="type a clue" readonly />
+          </div>
+          <button class="clue-chip" id="clueChip" type="button">code</button>
+          <div class="mock-search-results" id="mockSearchResults">
+            <div class="mock-result-item" data-match="code">
+              <strong>◈ Memory card</strong>
+              <p>code helper</p>
+            </div>
+            <div class="mock-result-item" data-match="other">
+              <strong>○ Other note</strong>
+              <p>not this one</p>
+            </div>
+          </div>
+        </div>
+        <button class="sandbox-btn" id="btnRunSearch">
+          <span class="btn-icon">◎</span> Find it
+        </button>
+      </div>
+    </div>
+
+    <div class="guide-description-card" id="guideDescCard" aria-live="polite">
+      <span class="guide-prompt-icon" id="guidePromptIcon">✦</span>
+      <div>
+        <h3 id="guideStepTitle">Tap the star</h3>
+        <p id="guideStepText">idea → sheep</p>
+      </div>
+    </div>
+
+    <div class="guide-controls" aria-label="Guide controls">
+      <button class="play-guide" id="playGuide" type="button">▶ Show me</button>
+      <div class="guide-progress" aria-hidden="true">
+        <span class="active"></span><span></span><span></span>
+      </div>
+    </div>
+
+    <button class="text-button dismiss-guide" id="dismissGuide">Hide guide</button>
+  </aside>
+
+  <!-- Particle Container for Floating Snippets -->
+  <div class="particle-container" id="particleContainer"></div>
+
+
   <div class="stage" id="stage">
 
     <div class="halo"></div>
 
-    <div class="sheep-wrap" id="sheepWrap">
+    <div class="sheep-wrap" id="sheepWrap" role="button" tabindex="0" aria-label="Open Electric Sheep actions" aria-expanded="false">
       <img src="./image.png" alt="Electric Sheep" draggable="false" />
     </div>
     <div class="sheep-ring"></div>
@@ -24,10 +205,10 @@
     <div class="dot dot-4"></div>
     <div class="dot dot-5"></div>
 
-    <p class="hint">click the sheep to explore</p>
+    <p class="hint">choose an action</p>
 
     <!-- 0: Save (top) -->
-    <div class="radial-btn" data-idx="0">
+    <div class="radial-btn" data-idx="0" role="button" tabindex="0" aria-label="Save">
       <span class="btn-icon">⊕</span>
       <span>Save</span>
       <div class="menu-panel">
@@ -58,11 +239,12 @@
           <button id="importFiles" class="src-btn">Import files</button>
         </div>
         <button id="saveBookmark" class="save-btn">Save bookmark</button>
+        <p id="captureStatus" class="tool-status hidden" aria-live="polite"></p>
       </div>
     </div>
 
     <!-- 1: Library (top-right) -->
-    <div class="radial-btn" data-idx="1">
+    <div class="radial-btn" data-idx="1" role="button" tabindex="0" aria-label="Library">
       <span class="btn-icon">◈</span>
       <span>Library</span>
       <div class="menu-panel panel-wide">
@@ -72,7 +254,7 @@
     </div>
 
     <!-- 2: Sessions (bottom-right) -->
-    <div class="radial-btn" data-idx="2">
+    <div class="radial-btn" data-idx="2" role="button" tabindex="0" aria-label="Sessions">
       <span class="btn-icon">◉</span>
       <span>Sessions</span>
       <div class="menu-panel panel-wide">
@@ -82,7 +264,7 @@
     </div>
 
     <!-- 3: Search (bottom-left) -->
-    <div class="radial-btn" data-idx="3">
+    <div class="radial-btn" data-idx="3" role="button" tabindex="0" aria-label="Search">
       <span class="btn-icon">◎</span>
       <span>Search</span>
       <div class="menu-panel panel-wide">
@@ -95,7 +277,7 @@
     </div>
 
     <!-- 4: Tools (bottom-left) -->
-    <div class="radial-btn" data-idx="4">
+    <div class="radial-btn" data-idx="4" role="button" tabindex="0" aria-label="Tools">
       <span class="btn-icon">⬡</span>
       <span>Tools</span>
       <div class="menu-panel">
@@ -109,7 +291,7 @@
     </div>
 
     <!-- 5: Settings (top-left) -->
-    <div class="radial-btn" data-idx="5">
+    <div class="radial-btn" data-idx="5" role="button" tabindex="0" aria-label="Settings">
       <span class="btn-icon">⚙</span>
       <span>Settings</span>
       <div class="menu-panel">
@@ -157,15 +339,25 @@
 <script src="./src/renderer.js"></script>
 <script>
 (function () {
-  const RADIUS = 280;
   const GAP    = 14;
   const stage  = document.getElementById('stage');
   const sheep  = document.getElementById('sheepWrap');
+  const onboardingPanel = document.getElementById('onboardingPanel');
+  const dismissGuide = document.getElementById('dismissGuide');
+  const guideZoomIn = document.getElementById('guideZoomIn');
+  const guideZoomOut = document.getElementById('guideZoomOut');
+  const guideDragHandle = document.getElementById('guideDragHandle');
+  const guideResizeHandle = document.getElementById('guideResizeHandle');
   const angles = [-90, -30, 30, 90, 150, 210].map(d => d * Math.PI / 180);
   const btns   = [...document.querySelectorAll('.radial-btn')];
 
   let zTop   = 100;
   let isOpen = false;
+  let guideZoom = 1;
+  let guideWidth = 0;
+  let guideHeight = 0;
+  let guideLeft = NaN;
+  let guideTop = NaN;
 
   // Callbacks when each panel opens
   const onOpen = {
@@ -195,14 +387,188 @@
     return panel;
   });
 
-  // Init: buttons at radial positions, scaled to 0 (never cross sheep)
-  btns.forEach((btn, i) => {
-    const tx = Math.cos(angles[i]) * RADIUS;
-    const ty = Math.sin(angles[i]) * RADIUS;
-    btn.dataset.tx = tx;
-    btn.dataset.ty = ty;
-    btn.style.transition = 'none';
-    btn.style.transform  = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`;
+  function getRadius() {
+    return Math.min(280, Math.max(108, Math.min(window.innerWidth, window.innerHeight) * 0.27));
+  }
+
+  function positionButtons(animated = false) {
+    const radius = getRadius();
+    btns.forEach((btn, i) => {
+      const tx = Math.cos(angles[i]) * radius;
+      const ty = Math.sin(angles[i]) * radius;
+      btn.dataset.tx = tx;
+      btn.dataset.ty = ty;
+      if (!animated) btn.style.transition = 'none';
+      btn.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${isOpen ? 1 : 0})`;
+    });
+  }
+
+  // Init: buttons at radial positions, scaled to 0
+  positionButtons(false);
+
+  function clampNumber(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getDefaultGuideWidth() {
+    if (window.innerWidth <= 520) return Math.min(292, window.innerWidth - 20);
+    if (window.innerWidth <= 900 || window.innerHeight <= 640) return Math.min(320, window.innerWidth - 32);
+    return Math.min(380, window.innerWidth - 56);
+  }
+
+  function getDefaultGuideHeight() {
+    const targetHeight = window.innerWidth <= 520 ? 510 : (window.innerWidth <= 900 || window.innerHeight <= 640 ? 528 : 540);
+    return Math.min(targetHeight, window.innerHeight - 32);
+  }
+
+  function getGuideHeightLimits() {
+    const maxHeight = Math.max(360, Math.min(700, window.innerHeight - 32));
+    const minHeight = Math.min(430, maxHeight);
+    return { minHeight, maxHeight };
+  }
+
+  function getDefaultGuidePosition() {
+    if (window.innerWidth <= 520) return { left: 10, top: 10 };
+    if (window.innerWidth <= 900 || window.innerHeight <= 640) return { left: 16, top: 16 };
+    return { left: 28, top: 28 };
+  }
+
+  function applyGuidePosition() {
+    if (!onboardingPanel) return;
+    const fallback = getDefaultGuidePosition();
+    if (!Number.isFinite(guideLeft)) guideLeft = fallback.left;
+    if (!Number.isFinite(guideTop)) guideTop = fallback.top;
+
+    const rect = onboardingPanel.getBoundingClientRect();
+    const visualWidth = rect.width || guideWidth * guideZoom || getDefaultGuideWidth();
+    const visualHeight = rect.height || onboardingPanel.offsetHeight * guideZoom || 420;
+    const margin = 8;
+    const maxLeft = Math.max(margin, window.innerWidth - visualWidth - margin);
+    const maxTop = Math.max(margin, window.innerHeight - visualHeight - margin);
+
+    guideLeft = clampNumber(guideLeft, margin, maxLeft);
+    guideTop = clampNumber(guideTop, margin, maxTop);
+    onboardingPanel.style.left = `${Math.round(guideLeft)}px`;
+    onboardingPanel.style.top = `${Math.round(guideTop)}px`;
+  }
+
+  function applyGuideSize() {
+    if (!onboardingPanel) return;
+    const maxWidth = Math.max(230, window.innerWidth - 32);
+    const { minHeight, maxHeight } = getGuideHeightLimits();
+    guideWidth = clampNumber(guideWidth || getDefaultGuideWidth(), 260, Math.min(520, maxWidth));
+    guideHeight = clampNumber(guideHeight || getDefaultGuideHeight(), minHeight, maxHeight);
+    guideZoom = clampNumber(guideZoom || 1, 0.72, 1.35);
+    onboardingPanel.style.setProperty('--guide-width', `${Math.round(guideWidth)}px`);
+    onboardingPanel.style.setProperty('--guide-height', `${Math.round(guideHeight)}px`);
+    onboardingPanel.style.setProperty('--guide-zoom', guideZoom.toFixed(2));
+    guideZoomOut?.toggleAttribute('disabled', guideZoom <= 0.73);
+    guideZoomIn?.toggleAttribute('disabled', guideZoom >= 1.34);
+    applyGuidePosition();
+  }
+
+  function saveGuideSize() {
+    try {
+      localStorage.setItem('electricSheep.guideWidth.v2', String(Math.round(guideWidth)));
+      localStorage.setItem('electricSheep.guideHeight', String(Math.round(guideHeight)));
+      localStorage.setItem('electricSheep.guideZoom', guideZoom.toFixed(2));
+      localStorage.setItem('electricSheep.guideLeft', String(Math.round(guideLeft)));
+      localStorage.setItem('electricSheep.guideTop', String(Math.round(guideTop)));
+    } catch {}
+  }
+
+  function loadGuideSize() {
+    try {
+      const storedWidth = Number(localStorage.getItem('electricSheep.guideWidth.v2'));
+      const storedHeight = Number(localStorage.getItem('electricSheep.guideHeight'));
+      const storedZoom = Number(localStorage.getItem('electricSheep.guideZoom'));
+      const storedLeft = Number(localStorage.getItem('electricSheep.guideLeft'));
+      const storedTop = Number(localStorage.getItem('electricSheep.guideTop'));
+      if (Number.isFinite(storedWidth) && storedWidth > 0) guideWidth = storedWidth;
+      if (Number.isFinite(storedHeight) && storedHeight > 0) guideHeight = storedHeight;
+      if (Number.isFinite(storedZoom) && storedZoom > 0) guideZoom = storedZoom;
+      if (Number.isFinite(storedLeft)) guideLeft = storedLeft;
+      if (Number.isFinite(storedTop)) guideTop = storedTop;
+    } catch {}
+    applyGuideSize();
+  }
+
+  loadGuideSize();
+
+  guideZoomOut?.addEventListener('click', e => {
+    e.stopPropagation();
+    guideZoom = clampNumber(guideZoom - 0.1, 0.72, 1.35);
+    applyGuideSize();
+    saveGuideSize();
+  });
+
+  guideZoomIn?.addEventListener('click', e => {
+    e.stopPropagation();
+    guideZoom = clampNumber(guideZoom + 0.1, 0.72, 1.35);
+    applyGuideSize();
+    saveGuideSize();
+  });
+
+  guideDragHandle?.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = onboardingPanel?.getBoundingClientRect();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const fallback = getDefaultGuidePosition();
+    const startLeft = Number.isFinite(rect?.left) ? rect.left : (Number.isFinite(guideLeft) ? guideLeft : fallback.left);
+    const startTop = Number.isFinite(rect?.top) ? rect.top : (Number.isFinite(guideTop) ? guideTop : fallback.top);
+    guideDragHandle.setPointerCapture?.(e.pointerId);
+    onboardingPanel?.classList.add('dragging');
+
+    function onPointerMove(moveEvent) {
+      guideLeft = startLeft + (moveEvent.clientX - startX);
+      guideTop = startTop + (moveEvent.clientY - startY);
+      applyGuidePosition();
+    }
+
+    function onPointerUp() {
+      guideDragHandle.releasePointerCapture?.(e.pointerId);
+      onboardingPanel?.classList.remove('dragging');
+      saveGuideSize();
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+    }
+
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+  });
+
+  guideResizeHandle?.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startRect = onboardingPanel?.getBoundingClientRect();
+    const startWidth = startRect?.width / guideZoom || guideWidth || getDefaultGuideWidth();
+    const startHeight = startRect?.height / guideZoom || guideHeight || getDefaultGuideHeight();
+    guideResizeHandle.setPointerCapture?.(e.pointerId);
+    onboardingPanel?.classList.add('resizing');
+
+    function onPointerMove(moveEvent) {
+      const deltaX = (moveEvent.clientX - startX) / guideZoom;
+      const deltaY = (moveEvent.clientY - startY) / guideZoom;
+      const { minHeight, maxHeight } = getGuideHeightLimits();
+      guideWidth = clampNumber(startWidth + deltaX, 260, Math.min(520, window.innerWidth - 32));
+      guideHeight = clampNumber(startHeight + deltaY, minHeight, maxHeight);
+      applyGuideSize();
+    }
+
+    function onPointerUp() {
+      guideResizeHandle.releasePointerCapture?.(e.pointerId);
+      onboardingPanel?.classList.remove('resizing');
+      saveGuideSize();
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+    }
+
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
   });
 
   function showPanel(i) {
@@ -227,6 +593,7 @@
     panel.style.opacity   = '0';
     panel.style.transform = 'scale(0.9)';
     panel.style.display   = 'flex';
+    clampPanel(panel);
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
       panel.style.transition = 'opacity 0.2s ease, transform 0.25s cubic-bezier(0.34,1.4,0.64,1)';
@@ -245,6 +612,22 @@
     panel.style.transform  = 'scale(0.9)';
     setTimeout(() => { panel.style.display = 'none'; }, 200);
     btns[i].classList.remove('active');
+  }
+
+  function hideAllPanels() {
+    panels.forEach((panel, i) => {
+      if (panel.style.display !== 'none') hidePanel(i);
+    });
+  }
+
+  function clampPanel(panel) {
+    const rect = panel.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || rect.width;
+    const panelHeight = Math.min(panel.offsetHeight || rect.height, window.innerHeight - 16);
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - panelWidth - 8));
+    const top = Math.max(8, Math.min(rect.top, window.innerHeight - panelHeight - 8));
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
   }
 
   function makeDraggable(panel) {
@@ -266,6 +649,7 @@
       if (!drag) return;
       panel.style.left = (e.clientX - ox) + 'px';
       panel.style.top  = (e.clientY - oy) + 'px';
+      clampPanel(panel);
     });
 
     document.addEventListener('mouseup', () => {
@@ -280,9 +664,16 @@
     isOpen ? closeButtons() : openButtons();
   });
 
+  sheep.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    isOpen ? closeButtons() : openButtons();
+  });
+
   function openButtons() {
     isOpen = true;
     stage.classList.add('open');
+    sheep.setAttribute('aria-expanded', 'true');
     btns.forEach((btn, i) => {
       const tx = parseFloat(btn.dataset.tx);
       const ty = parseFloat(btn.dataset.ty);
@@ -299,6 +690,8 @@
   function closeButtons() {
     isOpen = false;
     stage.classList.remove('open');
+    sheep.setAttribute('aria-expanded', 'false');
+    hideAllPanels();
     btns.forEach((btn, i) => {
       const tx    = parseFloat(btn.dataset.tx);
       const ty    = parseFloat(btn.dataset.ty);
@@ -317,9 +710,385 @@
       if (!isOpen) return;
       showPanel(i);
     });
+    btn.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isOpen) return;
+      showPanel(i);
+    });
   });
 
+  const guideDetails = {
+    see: {
+      icon: '✦',
+      title: 'Tap the star',
+      text: 'idea → sheep'
+    },
+    keep: {
+      icon: '◈',
+      title: 'Add stickers',
+      text: 'card → shelf'
+    },
+    ask: {
+      icon: '◎',
+      title: 'Use a clue',
+      text: 'clue → card'
+    }
+  };
+  const guideOrder = ['see', 'keep', 'ask'];
+  let guideTimer = null;
+  let searchTypingInterval = null;
+  let guideDemoTimer = null;
+
+  function selectGuideTopic(topic) {
+    const node = document.querySelector(`[data-guide-topic="${topic}"]`);
+    const detail = guideDetails[topic];
+    if (!node || !detail) return;
+
+    // Toggle active state on tabs and visual map nodes
+    document.querySelectorAll('.guide-tab').forEach(item => {
+      const active = item.dataset.guideTopic === topic;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('.map-step').forEach(item => {
+      item.classList.toggle('active', item.dataset.guideTopic === topic);
+    });
+    const mindmap = document.getElementById('guideMindmap');
+    if (mindmap) {
+      mindmap.classList.remove('map-see', 'map-keep', 'map-ask');
+      mindmap.classList.add(`map-${topic}`);
+    }
+
+    // Toggle active sandbox panes
+    document.querySelectorAll('.sandbox-pane').forEach(pane => {
+      pane.classList.toggle('active', pane.id === `pane-${topic}`);
+    });
+
+    // Update progress indicator dots
+    const index = guideOrder.indexOf(topic);
+    document.querySelectorAll('.guide-progress span').forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+
+    // Update description text card
+    const titleNode = document.getElementById('guideStepTitle');
+    const textNode = document.getElementById('guideStepText');
+    const iconNode = document.getElementById('guidePromptIcon');
+    if (iconNode) iconNode.textContent = detail.icon;
+    if (titleNode) titleNode.textContent = detail.title;
+    if (textNode) textNode.textContent = detail.text;
+
+    // Manage Stage Spotlight states
+    const stageContainer = document.getElementById('stage');
+    if (stageContainer) {
+      stageContainer.classList.remove('spotlight-save', 'spotlight-library', 'spotlight-search');
+      if (topic === 'see') stageContainer.classList.add('spotlight-save');
+      else if (topic === 'keep') stageContainer.classList.add('spotlight-library');
+      else if (topic === 'ask') stageContainer.classList.add('spotlight-search');
+    }
+
+    // Reset interactive states for this panel
+    resetSandboxState(topic);
+  }
+
+  function resetSandboxState(topic) {
+    // Clear typing simulation loop
+    if (searchTypingInterval) {
+      clearInterval(searchTypingInterval);
+      searchTypingInterval = null;
+    }
+    if (guideDemoTimer) {
+      clearTimeout(guideDemoTimer);
+      guideDemoTimer = null;
+    }
+
+    if (topic === 'see') {
+      const copyBtn = document.getElementById('btnCopySnippet');
+      if (copyBtn) {
+        copyBtn.disabled = false;
+        copyBtn.classList.remove('success');
+        copyBtn.innerHTML = '<span class="btn-icon">✦</span> Copy this';
+      }
+      document.querySelector('#pane-see .toy-flow')?.classList.remove('copied');
+      document.querySelector('#pane-see .idea-token')?.classList.remove('sent');
+    } else if (topic === 'keep') {
+      const keepBtn = document.getElementById('btnKeepBookmark');
+      if (keepBtn) {
+        keepBtn.disabled = true;
+        keepBtn.classList.remove('success');
+        keepBtn.innerHTML = '<span class="btn-icon">◈</span> Put away';
+      }
+      const card = document.querySelector('#pane-keep .mock-card');
+      if (card) {
+        card.classList.remove('saved', 'tagged');
+      }
+      document.querySelector('#pane-keep .memory-shelf')?.classList.remove('saved');
+      const tagList = document.getElementById('mockCardTags');
+      if (tagList) {
+        tagList.innerHTML = '';
+      }
+      document.querySelectorAll('#pane-keep .tag-pill').forEach(pill => {
+        pill.disabled = false;
+        pill.classList.remove('added');
+      });
+    } else if (topic === 'ask') {
+      const searchBtn = document.getElementById('btnRunSearch');
+      if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.classList.remove('success');
+        searchBtn.innerHTML = '<span class="btn-icon">◎</span> Find it';
+      }
+      const searchInput = document.getElementById('mockSearchInput');
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      const searchResults = document.getElementById('mockSearchResults');
+      if (searchResults) {
+        searchResults.classList.remove('filtered');
+      }
+      document.querySelector('#pane-ask .finder-board')?.classList.remove('searching');
+    }
+  }
+
+  // Hook up Sandbox step interactions
+  
+  // Step 1: Copy AI Answer
+  document.getElementById('btnCopySnippet')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const copyBtn = e.currentTarget;
+    copyBtn.disabled = true;
+    copyBtn.classList.add('success');
+    copyBtn.innerHTML = '<span class="btn-icon">✓</span> Sheep got it';
+    document.querySelector('#pane-see .toy-flow')?.classList.add('copied');
+    document.querySelector('#pane-see .idea-token')?.classList.add('sent');
+
+    // Launch floating snippet particles
+    triggerFloatingParticle(copyBtn);
+
+    // Pulse the central Sheep image
+    const sheepElement = document.getElementById('sheepWrap');
+    if (sheepElement) {
+      sheepElement.style.transform = 'scale(1.15)';
+      sheepElement.style.filter = 'drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))';
+      setTimeout(() => {
+        sheepElement.style.transform = '';
+        sheepElement.style.filter = '';
+      }, 500);
+    }
+  });
+
+  function triggerFloatingParticle(sourceElement) {
+    const container = document.getElementById('particleContainer');
+    const sheepElement = document.getElementById('sheepWrap');
+    if (!container || !sheepElement) return;
+
+    const sourceRect = sourceElement.getBoundingClientRect();
+    const targetRect = sheepElement.getBoundingClientRect();
+
+    const particle = document.createElement('div');
+    particle.className = 'floating-particle fly-to-sheep';
+    particle.textContent = 'idea';
+
+    const startX = sourceRect.left + sourceRect.width / 2;
+    const startY = sourceRect.top + sourceRect.height / 2;
+    const endX = targetRect.left + targetRect.width / 2;
+    const endY = targetRect.top + targetRect.height / 2;
+
+    particle.style.setProperty('--startX', `${startX}px`);
+    particle.style.setProperty('--startY', `${startY}px`);
+    particle.style.setProperty('--endX', `${endX}px`);
+    particle.style.setProperty('--endY', `${endY}px`);
+
+    container.appendChild(particle);
+
+    setTimeout(() => {
+      particle.remove();
+    }, 850);
+  }
+
+  // Step 2: Tag Selector clicking
+  document.querySelectorAll('#pane-keep .tag-pill').forEach(pill => {
+    pill.addEventListener('click', e => {
+      e.stopPropagation();
+      const tagText = pill.dataset.tag;
+      pill.disabled = true;
+      pill.classList.add('added');
+
+      const tagList = document.getElementById('mockCardTags');
+      if (tagList) {
+        const tagSpan = document.createElement('span');
+        tagSpan.className = 'tag';
+        tagSpan.textContent = tagText === 'js' ? 'JS' : tagText;
+        tagList.appendChild(tagSpan);
+      }
+      document.querySelector('#pane-keep .mock-card')?.classList.add('tagged');
+
+      const keepBtn = document.getElementById('btnKeepBookmark');
+      if (keepBtn) {
+        keepBtn.disabled = false;
+      }
+    });
+  });
+
+  // Step 2: Keep in Library bookmark saving
+  document.getElementById('btnKeepBookmark')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const keepBtn = e.currentTarget;
+    keepBtn.disabled = true;
+    keepBtn.classList.add('success');
+    keepBtn.innerHTML = '<span class="btn-icon">✓</span> Saved';
+
+    const card = document.querySelector('#pane-keep .mock-card');
+    if (card) {
+      card.classList.add('saved');
+    }
+    document.querySelector('#pane-keep .memory-shelf')?.classList.add('saved');
+
+    // Progress automatically to step 3 after 1s
+    setTimeout(() => {
+      const isStillOnKeep = document.querySelector('.guide-tab[data-guide-topic="keep"]').classList.contains('active');
+      if (isStillOnKeep) {
+        if (guideTimer) return;
+        document.getElementById('playGuide').textContent = '▶ Show me';
+        selectGuideTopic('ask');
+      }
+    }, 1000);
+  });
+
+  // Step 3: Run Search typing and filter
+  document.getElementById('btnRunSearch')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const searchBtn = e.currentTarget;
+    searchBtn.disabled = true;
+    
+    const inputField = document.getElementById('mockSearchInput');
+    const resultsContainer = document.getElementById('mockSearchResults');
+    if (!inputField || !resultsContainer) return;
+
+    inputField.value = '';
+    resultsContainer.classList.remove('filtered');
+    document.querySelector('#pane-ask .finder-board')?.classList.add('searching');
+
+    const searchQuery = 'code';
+    let charIndex = 0;
+    
+    searchTypingInterval = setInterval(() => {
+      inputField.value += searchQuery[charIndex];
+      charIndex++;
+      if (charIndex >= searchQuery.length) {
+        clearInterval(searchTypingInterval);
+        searchTypingInterval = null;
+        
+        resultsContainer.classList.add('filtered');
+        searchBtn.classList.add('success');
+        searchBtn.innerHTML = '<span class="btn-icon">✓</span> Found';
+      }
+    }, 180);
+  });
+
+  document.getElementById('clueChip')?.addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('btnRunSearch')?.click();
+  });
+
+
+
+  // Step Navigation clicking
+  document.addEventListener('click', e => {
+    const node = e.target.closest('[data-guide-topic]');
+    if (!node) return;
+    e.preventDefault();
+    clearInterval(guideTimer);
+    guideTimer = null;
+    document.getElementById('playGuide').textContent = '▶ Show me';
+    const topic = node.dataset.guideTopic;
+    selectGuideTopic(topic);
+    if (node.classList.contains('map-step')) {
+      guideDemoTimer = setTimeout(() => runGuideDemo(topic), 180);
+    }
+  });
+
+  function runGuideDemo(topic) {
+    if (topic === 'see') {
+      const copyBtn = document.getElementById('btnCopySnippet');
+      if (copyBtn && !copyBtn.disabled) copyBtn.click();
+    } else if (topic === 'keep') {
+      const firstTag = document.querySelector('#pane-keep .tag-pill:not(:disabled)');
+      if (firstTag) firstTag.click();
+    } else if (topic === 'ask') {
+      const searchBtn = document.getElementById('btnRunSearch');
+      if (searchBtn && !searchBtn.disabled) searchBtn.click();
+    }
+  }
+
+  document.getElementById('mindCenter')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const topic = document.querySelector('.map-step.active')?.dataset.guideTopic || 'see';
+    runGuideDemo(topic);
+  });
+
+  // Autoplay Play/Pause cycle
+  document.getElementById('playGuide')?.addEventListener('click', () => {
+    const playButton = document.getElementById('playGuide');
+    if (guideTimer) {
+      clearInterval(guideTimer);
+      guideTimer = null;
+      if (guideDemoTimer) {
+        clearTimeout(guideDemoTimer);
+        guideDemoTimer = null;
+      }
+      playButton.textContent = '▶ Show me';
+      return;
+    }
+    
+    playButton.textContent = 'Ⅱ Pause';
+    let currentIdx = guideOrder.indexOf(document.querySelector('.map-step.active')?.dataset.guideTopic || 'see');
+    currentIdx = (currentIdx + 1) % guideOrder.length;
+    selectGuideTopic(guideOrder[currentIdx]);
+    guideDemoTimer = setTimeout(() => runGuideDemo(guideOrder[currentIdx]), 180);
+    
+    guideTimer = setInterval(() => {
+      currentIdx = (currentIdx + 1) % guideOrder.length;
+      selectGuideTopic(guideOrder[currentIdx]);
+      guideDemoTimer = setTimeout(() => runGuideDemo(guideOrder[currentIdx]), 180);
+    }, 2800);
+  });
+
+  // Dismiss Guide handler
+  dismissGuide?.addEventListener('click', () => {
+    onboardingPanel?.classList.add('hidden');
+    const stageContainer = document.getElementById('stage');
+    if (stageContainer) {
+      stageContainer.classList.remove('spotlight-save', 'spotlight-library', 'spotlight-search');
+    }
+    try { localStorage.setItem('electricSheep.hideGuide', '1'); } catch {}
+    if (!isOpen) openButtons();
+  });
+
+  try {
+    if (localStorage.getItem('electricSheep.hideGuide') === '1') {
+      onboardingPanel?.classList.add('hidden');
+    }
+  } catch {}
+
+  window.addEventListener('resize', () => {
+    positionButtons(true);
+    panels.forEach(clampPanel);
+    applyGuideSize();
+  });
+  
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeButtons(); });
+  
+  setTimeout(() => {
+    const guideVisible = !onboardingPanel?.classList.contains('hidden');
+    if (guideVisible && !guideTimer) {
+      selectGuideTopic('see');
+    }
+    if (!guideVisible) openButtons();
+  }, 450);
+
 })();
 </script>
 </body>
