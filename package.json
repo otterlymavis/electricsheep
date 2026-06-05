@@ -10,6 +10,7 @@
     "npmRebuild": false,
     "files": [
       "index.html",
+      "image.png",
       "src/**/*",
       "scripts/ocr.swift",
       "package.json"
