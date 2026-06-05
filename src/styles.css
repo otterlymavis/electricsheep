@@ -2,20 +2,15 @@
 
 /* ── Variables ────────────────────────────────────────────────────────── */
 :root {
-  --bg:        #060512;
-  --panel:     rgba(10, 9, 26, 0.97);
-  --panel-hi:  #13122a;
-  --border:    rgba(0, 229, 255, 0.18);
-  --border-hi: rgba(0, 229, 255, 0.5);
-  --cyan:      #00e5ff;
-  --pink:      #ff2d6f;
-  --purple:    #a78bfa;
-  --mint:      #5eead4;
-  --amber:     #fbbf24;
-  --text:      #dde4f0;
-  --muted:     #55647a;
-  --glow-c:    0 0 20px rgba(0, 229, 255, 0.4);
-  --glow-p:    0 0 20px rgba(255, 45, 111, 0.4);
+  --bg:     #060512;
+  --border: rgba(0, 229, 255, 0.18);
+  --cyan:   #00e5ff;
+  --pink:   #ff2d6f;
+  --purple: #a78bfa;
+  --mint:   #5eead4;
+  --amber:  #fbbf24;
+  --text:   #dde4f0;
+  --muted:  #55647a;
 }
 
 /* ── Reset ────────────────────────────────────────────────────────────── */
