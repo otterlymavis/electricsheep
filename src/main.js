@@ -1,4 +1,5 @@
 const { app, BrowserWindow, clipboard, desktopCapturer, dialog, ipcMain, globalShortcut, nativeImage, screen } = require("electron");
+const { createServer } = require("node:http");
 const { randomUUID } = require("node:crypto");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -10,6 +11,60 @@ const pty = require("node-pty");
 const { deleteBookmark, deleteSession, ensureStore, getStorePaths, isInsideBaseDir, readBookmarks, readSessions, updateBookmarks, writeBookmarks } = require("./store");
 
 let mainWindow;
+const CAPTURE_PORT = 33099;
+
+function startCaptureServer() {
+  const server = createServer((req, res) => {
+    res.setHeader("Access-Control-Allow-Origin",  "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
+
+    if (req.method === "GET" && req.url === "/ping") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true, app: "Electric Sheep" }));
+      return;
+    }
+
+    if (req.method === "POST" && req.url === "/capture") {
+      let body = "";
+      req.on("data", chunk => { body += chunk; });
+      req.on("end", async () => {
+        try {
+          const data  = JSON.parse(body);
+          const saved = {
+            id:           randomUUID(),
+            title:        data.title || data.url || "Browser capture",
+            text:         (data.text || "").trim(),
+            note:         `Captured from ${data.source || "browser"} — ${data.url || ""}`.trim(),
+            tags:         ["browser", data.source].filter(Boolean),
+            source:       "browser-extension",
+            attachments:  [],
+            createdAt:    new Date().toISOString()
+          };
+
+          const bookmarks = await readBookmarks();
+          bookmarks.unshift(saved);
+          await writeBookmarks(bookmarks);
+
+          if (mainWindow) mainWindow.webContents.send("bookmark-added", saved);
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, id: saved.id }));
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: e.message }));
+        }
+      });
+      return;
+    }
+
+    res.writeHead(404); res.end();
+  });
+
+  server.listen(CAPTURE_PORT, "127.0.0.1");
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -153,6 +208,7 @@ async function createImageAttachment(filePath, originalName) {
 app.whenReady().then(async () => {
   await ensureStore();
   createWindow();
+  startCaptureServer();
 
   globalShortcut.register("CommandOrControl+Shift+B", () => {
     showCaptureWindow(clipboard.readText());

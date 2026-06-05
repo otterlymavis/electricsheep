@@ -22,5 +22,8 @@ contextBridge.exposeInMainWorld("electricSheep", {
   },
   onScreenshotCaptured: (callback) => {
     ipcRenderer.on("screenshot-captured", (_event, screenshot) => callback(screenshot));
+  },
+  onBookmarkAdded: (callback) => {
+    ipcRenderer.on("bookmark-added", (_event, bookmark) => callback(bookmark));
   }
 });

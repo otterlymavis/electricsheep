@@ -386,6 +386,10 @@ sessionList.addEventListener("click", async event => {
 
 // ── Global shortcut callbacks ─────────────────────────────────────────────
 
+window.electricSheep.onBookmarkAdded(() => {
+  loadBookmarks();
+});
+
 window.electricSheep.onClipboardCaptured(text => {
   captureText.value = text;
   captureText.focus();

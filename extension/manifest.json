@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Electric Sheep",
+  "version": "0.1.0",
+  "description": "Capture AI conversations to Electric Sheep",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://localhost:33099/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Save to Electric Sheep"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://copilot.microsoft.com/*",
+        "https://www.perplexity.ai/*",
+        "https://aistudio.google.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

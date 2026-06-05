@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 const { randomUUID } = require("node:crypto");
+const { spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
+const os = require("node:os");
 const path = require("node:path");
 const pty = require("node-pty");
 const { exportArchive, importArchive } = require("../src/export");
@@ -63,6 +65,16 @@ async function main() {
 
   if (command === "delete") {
     await deleteItem(args[1], args[2]);
+    return;
+  }
+
+  if (command === "watch") {
+    await watchDesktop(args.slice(1));
+    return;
+  }
+
+  if (command === "ax") {
+    await axRead(args.slice(1));
     return;
   }
 
@@ -425,31 +437,216 @@ function firstLine(value) {
   return String(value || "").split(/\r?\n/).find(Boolean)?.slice(0, 80) || "";
 }
 
+// ── Desktop watch (screenshot + OCR) ─────────────────────────────────────
+
+async function watchDesktop(commandArgs) {
+  const appName = commandArgs[0];
+  const intervalIdx = commandArgs.indexOf("--interval");
+  const intervalSec = intervalIdx >= 0 ? (parseInt(commandArgs[intervalIdx + 1]) || 10) : 10;
+
+  if (!appName) {
+    throw new Error("Usage: sheep watch <app-name> [--interval <seconds>]");
+  }
+
+  if (process.platform !== "darwin") {
+    throw new Error("sheep watch requires macOS");
+  }
+
+  await ensureStore();
+
+  const sessionId  = randomUUID();
+  const startedAt  = new Date().toISOString();
+  const stamp      = startedAt.replace(/[:.]/g, "-");
+  const sessionDir = path.join(getStorePaths().sessionsDir, `${stamp}-${sessionId.slice(0, 8)}-watch-${safeName(appName)}`);
+  const transcriptPath = path.join(sessionDir, "transcript.txt");
+  const wrapUpPath     = path.join(sessionDir, "wrap-up.md");
+  const metadataPath   = path.join(sessionDir, "session.json");
+  const captureScript  = path.join(__dirname, "..", "scripts", "capture-window.swift");
+  const ocrScript      = path.join(__dirname, "..", "scripts", "ocr.swift");
+
+  await fsp.mkdir(sessionDir, { recursive: true });
+  console.error(`Watching: ${appName}  (every ${intervalSec}s, Ctrl+C to stop)`);
+  console.error(`Session: ${sessionDir}\n`);
+
+  const chunks  = [];
+  let prevText  = "";
+  let lineCount = 0;
+
+  async function tick() {
+    const tmpImg = path.join(os.tmpdir(), `sheep-watch-${Date.now()}.png`);
+    const capture = spawnSync("swift", [captureScript, appName, tmpImg], { encoding: "utf8" });
+    if (capture.status !== 0) {
+      process.stderr.write(`[watch] ${(capture.stderr || "capture failed").trim()}\n`);
+      return;
+    }
+
+    const ocr = spawnSync("swift", [ocrScript, tmpImg], { encoding: "utf8" });
+    await fsp.unlink(tmpImg).catch(() => {});
+    if (ocr.status !== 0 || !ocr.stdout.trim()) return;
+
+    const currentText = ocr.stdout.trim();
+    if (currentText === prevText) return;
+
+    const prevLines   = new Set(prevText.split("\n").filter(Boolean));
+    const newLines    = currentText.split("\n").filter(l => l.trim() && !prevLines.has(l));
+    if (newLines.length === 0) { prevText = currentText; return; }
+
+    const chunk = newLines.join("\n") + "\n";
+    chunks.push(chunk);
+    await fsp.appendFile(transcriptPath, chunk, "utf8");
+    lineCount += newLines.length;
+    prevText   = currentText;
+    process.stdout.write(`[${new Date().toLocaleTimeString()}] +${newLines.length} new line(s)\n`);
+  }
+
+  await tick();
+  const interval = setInterval(tick, intervalSec * 1000);
+
+  let stopping = false;
+  process.on("SIGINT", async () => {
+    if (stopping) return;
+    stopping = true;
+    clearInterval(interval);
+
+    const endedAt    = new Date().toISOString();
+    const durationMs = new Date(endedAt) - new Date(startedAt);
+    const transcript = chunks.join("");
+    const wrapUp     = buildWrapUp({ command: `watch ${appName}`, startedAt, endedAt, exitCode: 0, transcript });
+    const session    = {
+      id: sessionId, source: "desktop-watch", command: `watch ${appName}`,
+      startedAt, endedAt, durationMs, lineCount,
+      status: "completed", exitCode: 0,
+      transcriptPath, wrapUpPath, metadataPath
+    };
+
+    await fsp.writeFile(wrapUpPath,   wrapUp,                        "utf8");
+    await fsp.writeFile(metadataPath, JSON.stringify(session, null, 2), "utf8");
+    await addSession(session);
+    console.error(`\nSession saved: ${sessionDir}`);
+    process.exit(0);
+  });
+}
+
+// ── Accessibility API read ────────────────────────────────────────────────
+
+async function axRead(commandArgs) {
+  const appName     = commandArgs[0];
+  const intervalIdx = commandArgs.indexOf("--interval");
+  const intervalSec = intervalIdx >= 0 ? (parseInt(commandArgs[intervalIdx + 1]) || 5) : 5;
+  const oneShot     = commandArgs.includes("--once");
+
+  if (!appName) {
+    throw new Error("Usage: sheep ax <app-name> [--once] [--interval <seconds>]");
+  }
+
+  if (process.platform !== "darwin") {
+    throw new Error("sheep ax requires macOS");
+  }
+
+  const axScript = path.join(__dirname, "..", "scripts", "ax-read.swift");
+
+  if (oneShot) {
+    const result = spawnSync("swift", [axScript, appName], { encoding: "utf8" });
+    if (result.status !== 0) throw new Error(result.stderr.trim() || "ax-read failed");
+    console.log(result.stdout.trim());
+    return;
+  }
+
+  await ensureStore();
+
+  const sessionId  = randomUUID();
+  const startedAt  = new Date().toISOString();
+  const stamp      = startedAt.replace(/[:.]/g, "-");
+  const sessionDir = path.join(getStorePaths().sessionsDir, `${stamp}-${sessionId.slice(0, 8)}-ax-${safeName(appName)}`);
+  const transcriptPath = path.join(sessionDir, "transcript.txt");
+  const wrapUpPath     = path.join(sessionDir, "wrap-up.md");
+  const metadataPath   = path.join(sessionDir, "session.json");
+
+  await fsp.mkdir(sessionDir, { recursive: true });
+  console.error(`Accessibility watch: ${appName}  (every ${intervalSec}s, Ctrl+C to stop)`);
+  console.error(`Session: ${sessionDir}\n`);
+
+  let prevText  = "";
+  const chunks  = [];
+  let lineCount = 0;
+
+  async function tick() {
+    const result = spawnSync("swift", [axScript, appName], { encoding: "utf8" });
+    if (result.status !== 0) {
+      process.stderr.write(`[ax] ${(result.stderr || "ax-read failed").trim()}\n`);
+      return;
+    }
+
+    const currentText = result.stdout.trim();
+    if (!currentText || currentText === prevText) return;
+
+    const prevLines = new Set(prevText.split("\n").filter(Boolean));
+    const newLines  = currentText.split("\n").filter(l => l.trim() && !prevLines.has(l));
+    if (newLines.length === 0) { prevText = currentText; return; }
+
+    const chunk = newLines.join("\n") + "\n";
+    chunks.push(chunk);
+    await fsp.appendFile(transcriptPath, chunk, "utf8");
+    lineCount += newLines.length;
+    prevText   = currentText;
+    process.stdout.write(`[${new Date().toLocaleTimeString()}] +${newLines.length} new line(s)\n`);
+  }
+
+  await tick();
+  const interval = setInterval(tick, intervalSec * 1000);
+
+  let stopping = false;
+  process.on("SIGINT", async () => {
+    if (stopping) return;
+    stopping = true;
+    clearInterval(interval);
+
+    const endedAt    = new Date().toISOString();
+    const durationMs = new Date(endedAt) - new Date(startedAt);
+    const transcript = chunks.join("");
+    const wrapUp     = buildWrapUp({ command: `ax ${appName}`, startedAt, endedAt, exitCode: 0, transcript });
+    const session    = {
+      id: sessionId, source: "desktop-ax", command: `ax ${appName}`,
+      startedAt, endedAt, durationMs, lineCount,
+      status: "completed", exitCode: 0,
+      transcriptPath, wrapUpPath, metadataPath
+    };
+
+    await fsp.writeFile(wrapUpPath,   wrapUp,                        "utf8");
+    await fsp.writeFile(metadataPath, JSON.stringify(session, null, 2), "utf8");
+    await addSession(session);
+    console.error(`\nSession saved: ${sessionDir}`);
+    process.exit(0);
+  });
+}
+
 function printHelp() {
   console.log(`Electric Sheep
 
 Usage:
-  sheep track <command> [args...]   Track a terminal AI/work session
-  sheep track                       Track an interactive shell
-  sheep bookmarks                   List recent bookmarks
-  sheep sessions                    List recent tracked sessions
-  sheep delete bookmark <id>        Delete a bookmark
-  sheep delete session <id>         Delete a tracked session and its files
-  sheep ocr-backfill                OCR saved images that have not been processed
-  sheep export [directory]          Export Markdown and JSON archive
-  sheep import <json>               Import Electric Sheep JSON archive
-  sheep search <query>              Search bookmarks, OCR text, and sessions
-  sheep doctor                      Check local runtime dependencies
+  sheep track <command> [args...]          Track a terminal AI/work session
+  sheep track                              Track an interactive shell
+  sheep watch <app> [--interval <s>]       Watch a desktop app via screenshot+OCR
+  sheep ax <app> [--interval <s>] [--once] Watch a desktop app via Accessibility API
+  sheep bookmarks                          List recent bookmarks
+  sheep sessions                           List recent tracked sessions
+  sheep delete bookmark <id>               Delete a bookmark
+  sheep delete session <id>                Delete a tracked session and its files
+  sheep ocr-backfill                       OCR saved images that have not been processed
+  sheep export [directory]                 Export Markdown and JSON archive
+  sheep import <json>                      Import Electric Sheep JSON archive
+  sheep search <query>                     Search bookmarks, OCR text, and sessions
+  sheep doctor                             Check local runtime dependencies
 
 Examples:
   sheep track codex
   sheep track claude
   sheep track zsh
-  sheep track npm test
+  sheep watch Codex --interval 5
+  sheep watch Cursor --interval 10
+  sheep ax "Cursor" --interval 5
+  sheep ax Safari --once
   sheep bookmarks
-  sheep ocr-backfill
-  sheep export
-  sheep import ./electric-sheep-data.json
   sheep search docker
   sheep doctor
 `);
