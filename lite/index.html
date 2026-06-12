@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Electric Lamb</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="capture-pane" aria-label="Save memory">
+      <header class="brand">
+        <img src="./image.png" alt="" />
+        <div>
+          <p class="eyebrow" id="modeLabel">Local browser edition</p>
+          <h1>Electric Lamb</h1>
+        </div>
+      </header>
+
+      <label class="field">
+        <span>Title</span>
+        <input id="titleInput" type="text" placeholder="Optional title" />
+      </label>
+
+      <label class="field">
+        <span>Text</span>
+        <textarea id="textInput" rows="10" placeholder="Paste a useful AI answer, note, or snippet"></textarea>
+      </label>
+
+      <div class="field-grid">
+        <label class="field">
+          <span>Tags</span>
+          <input id="tagInput" type="text" placeholder="ai, code, idea" />
+        </label>
+        <label class="field">
+          <span>Note</span>
+          <input id="noteInput" type="text" placeholder="Why this matters" />
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button id="saveButton" class="primary-button" type="button">Save</button>
+        <button id="pasteButton" class="secondary-button" type="button">Paste</button>
+        <button id="importTextButton" class="secondary-button" type="button">Text file</button>
+        <button id="clearButton" class="secondary-button" type="button">Clear</button>
+      </div>
+      <input id="textFileInput" class="hidden" type="file" accept=".txt,.md,.json,.log,.csv,text/*" multiple />
+
+      <p id="statusLine" class="status-line" aria-live="polite"></p>
+
+      <section class="companion-card" aria-label="Native companion">
+        <div>
+          <strong id="companionTitle">Browser-only mode</strong>
+          <p id="companionText">Bookmarks are stored in this browser. Start the Lamb companion for shared store access and tracked sessions.</p>
+        </div>
+        <code>npm run lamb</code>
+      </section>
+    </section>
+
+    <section class="library-pane" aria-label="Saved library">
+      <div class="toolbar">
+        <label class="search-box">
+          <span>Search</span>
+          <input id="searchInput" type="search" placeholder="Find saved text, notes, or tags" />
+        </label>
+        <div class="toolbar-actions">
+          <button id="importButton" class="secondary-button" type="button">Import</button>
+          <button id="exportJsonButton" class="secondary-button" type="button">JSON</button>
+          <button id="exportMarkdownButton" class="secondary-button" type="button">Markdown</button>
+          <button id="exportHtmlButton" class="secondary-button" type="button">HTML</button>
+        </div>
+        <input id="importFile" class="hidden" type="file" accept=".json,application/json" />
+      </div>
+
+      <div class="reader-controls" aria-label="Reader controls">
+        <label>
+          <span>Size</span>
+          <input id="fontSizeInput" type="range" min="15" max="24" value="18" />
+        </label>
+        <label>
+          <span>Width</span>
+          <input id="measureInput" type="range" min="48" max="82" value="66" />
+        </label>
+        <label>
+          <span>Theme</span>
+          <select id="themeInput">
+            <option value="dark">Dark</option>
+            <option value="paper">Paper</option>
+            <option value="sepia">Sepia</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="native-tools" aria-label="Companion tools">
+        <button id="doctorButton" class="secondary-button" type="button">Doctor</button>
+        <button id="repairButton" class="secondary-button" type="button">Repair logs</button>
+        <button id="fullExportButton" class="secondary-button" type="button">Full export</button>
+        <span id="nativeStatus" class="native-status"></span>
+      </div>
+
+      <div class="library-layout">
+        <div id="bookmarkList" class="bookmark-list" aria-label="Saved items"></div>
+        <div class="reader-column">
+          <article id="readerBody" class="reader-body" aria-live="polite"></article>
+          <section class="sessions-panel" aria-label="Tracked sessions">
+            <div class="panel-heading">
+              <h2>Tracked Sessions</h2>
+              <button id="refreshSessionsButton" class="secondary-button" type="button">Refresh</button>
+            </div>
+            <div id="sessionList" class="session-list"></div>
+            <article id="sessionPreview" class="session-preview"></article>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

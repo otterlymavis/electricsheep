@@ -2,6 +2,9 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electricSheep", {
   readClipboardText: () => ipcRenderer.invoke("clipboard:read"),
+  readClipboardContent: () => ipcRenderer.invoke("clipboard:read-content"),
+  writeClipboardText: (text) => ipcRenderer.invoke("clipboard:write-text", text),
+  writeClipboardContent: (content) => ipcRenderer.invoke("clipboard:write-content", content),
   readClipboardImage: () => ipcRenderer.invoke("clipboard:image"),
   captureScreenshot: () => ipcRenderer.invoke("screenshot:capture"),
   importFiles: () => ipcRenderer.invoke("files:import"),
@@ -17,6 +20,7 @@ contextBridge.exposeInMainWorld("electricSheep", {
   getInfo: () => ipcRenderer.invoke("app:info"),
   ocrBackfill: () => ipcRenderer.invoke("ocr:backfill"),
   doctorCheck: () => ipcRenderer.invoke("doctor:check"),
+  repairLegacySessions: () => ipcRenderer.invoke("sessions:repair-legacy"),
   onClipboardCaptured: (callback) => {
     ipcRenderer.on("clipboard-captured", (_event, text) => callback(text));
   },

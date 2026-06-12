@@ -259,6 +259,22 @@
       <span>Sessions</span>
       <div class="menu-panel panel-wide">
         <div class="panel-title"><span>Sessions</span><button class="panel-close">✕</button></div>
+        <div class="track-panel">
+          <label class="field">
+            <span class="field-label">Track command</span>
+            <input id="trackCommand" type="text" placeholder="npm test, python script.py, ./run.sh" />
+          </label>
+          <label class="field">
+            <span class="field-label">Working directory</span>
+            <input id="trackCwd" type="text" placeholder="Defaults to your home folder" />
+          </label>
+          <div class="tool-row">
+            <button id="startTrack" class="tool-btn">Start tracking</button>
+            <button id="refreshTracks" class="tool-btn">Refresh</button>
+          </div>
+          <p id="trackStatus" class="tool-status hidden" aria-live="polite"></p>
+          <div id="activeTrackList" class="active-track-list"></div>
+        </div>
         <div id="sessionList" class="item-list" aria-live="polite"></div>
       </div>
     </div>
@@ -276,8 +292,68 @@
       </div>
     </div>
 
-    <!-- 4: Tools (bottom-left) -->
-    <div class="radial-btn" data-idx="4" role="button" tabindex="0" aria-label="Tools">
+    <!-- 4: Reader (lower-right) -->
+    <div class="radial-btn" data-idx="4" role="button" tabindex="0" aria-label="Reader">
+      <span class="btn-icon">▤</span>
+      <span>Reader</span>
+      <div class="menu-panel reader-panel">
+        <div class="panel-title"><span>Reader</span><button class="panel-close">✕</button></div>
+        <div class="reader-toolbar" aria-label="Reader controls">
+          <label class="reader-control">
+            <span>Font</span>
+            <select id="readerFontChoice" class="settings-select">
+              <option value="inter">Inter</option>
+              <option value="lexend">Lexend</option>
+              <option value="comic">Comic Sans</option>
+              <option value="opendyslexic">OpenDyslexic</option>
+            </select>
+          </label>
+          <label class="reader-control">
+            <span>Size</span>
+            <input id="readerFontSize" type="range" min="14" max="24" value="18" />
+          </label>
+          <label class="reader-control">
+            <span>Spacing</span>
+            <select id="readerLineHeight" class="settings-select">
+              <option value="1.45">Tight</option>
+              <option value="1.65" selected>Comfort</option>
+              <option value="1.9">Open</option>
+            </select>
+          </label>
+          <label class="reader-control">
+            <span>Width</span>
+            <input id="readerMeasure" type="range" min="48" max="84" value="66" />
+          </label>
+          <label class="reader-control">
+            <span>Theme</span>
+            <select id="readerTheme" class="settings-select">
+              <option value="dark">Dark</option>
+              <option value="paper">Paper</option>
+              <option value="sepia">Sepia</option>
+            </select>
+          </label>
+        </div>
+        <label class="field reader-search">
+          <span class="field-label">Find saved reading</span>
+          <input id="readerSearch" type="search" placeholder="Filter by title, text, note, or tag" />
+        </label>
+        <div class="reader-layout">
+          <div id="readerList" class="reader-list" aria-label="Saved items"></div>
+          <article id="readerBody" class="reader-body" aria-live="polite"></article>
+        </div>
+        <div class="reader-footer">
+          <button id="readerPrev" class="secondary-button small-button">Previous</button>
+          <span id="readerStats" class="reader-stats">0 words</span>
+          <div class="reader-progress" aria-hidden="true"><span id="readerProgressBar"></span></div>
+          <span id="readerCount" class="reader-count">0 saved</span>
+          <button id="readerCopy" class="secondary-button small-button">Copy</button>
+          <button id="readerNext" class="secondary-button small-button">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5: Tools (bottom-left) -->
+    <div class="radial-btn" data-idx="5" role="button" tabindex="0" aria-label="Tools">
       <span class="btn-icon">⬡</span>
       <span>Tools</span>
       <div class="menu-panel">
@@ -290,8 +366,8 @@
       </div>
     </div>
 
-    <!-- 5: Settings (top-left) -->
-    <div class="radial-btn" data-idx="5" role="button" tabindex="0" aria-label="Settings">
+    <!-- 6: Settings (top-left) -->
+    <div class="radial-btn" data-idx="6" role="button" tabindex="0" aria-label="Settings">
       <span class="btn-icon">⚙</span>
       <span>Settings</span>
       <div class="menu-panel">
@@ -322,10 +398,24 @@
         </div>
 
         <div class="settings-section">
+          <div class="settings-label">Reading</div>
+          <label class="settings-row" for="fontChoice">
+            <span>Font</span>
+            <select id="fontChoice" class="settings-select">
+              <option value="inter">Inter</option>
+              <option value="lexend">Lexend</option>
+              <option value="comic">Comic Sans</option>
+              <option value="opendyslexic">OpenDyslexic</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="settings-section">
           <div class="settings-label">Maintenance</div>
           <div class="tool-row">
             <button id="ocrBackfill" class="tool-btn">◎ OCR backfill</button>
             <button id="doctorCheck" class="tool-btn">⊡ Doctor check</button>
+            <button id="repairLegacySessions" class="tool-btn">◇ Repair legacy logs</button>
           </div>
         </div>
 
@@ -348,8 +438,8 @@
   const guideZoomOut = document.getElementById('guideZoomOut');
   const guideDragHandle = document.getElementById('guideDragHandle');
   const guideResizeHandle = document.getElementById('guideResizeHandle');
-  const angles = [-90, -30, 30, 90, 150, 210].map(d => d * Math.PI / 180);
   const btns   = [...document.querySelectorAll('.radial-btn')];
+  const angles = btns.map((_, i) => (-90 + (360 / btns.length) * i) * Math.PI / 180);
 
   let zTop   = 100;
   let isOpen = false;
@@ -364,7 +454,8 @@
     1: () => window.electricSheepUI?.loadBookmarks(),
     2: () => window.electricSheepUI?.loadSessions(),
     3: () => setTimeout(() => document.querySelector('#searchInput')?.focus(), 50),
-    5: () => window.electricSheepUI?.loadSettings()
+    4: () => window.electricSheepUI?.loadReader(),
+    6: () => window.electricSheepUI?.loadSettings()
   };
 
   // Move each panel to <body> so it escapes transformed parents
@@ -373,7 +464,7 @@
     document.body.appendChild(panel);
     panel.dataset.idx = String(i);
 
-    const pw = panel.classList.contains('panel-wide') ? 360 : 300;
+    const pw = panel.classList.contains('reader-panel') ? 640 : (panel.classList.contains('panel-wide') ? 360 : 300);
     panel.style.cssText += `width:${pw}px;position:fixed;display:none;opacity:0;transform:scale(0.9);z-index:${zTop};transition:opacity 0.2s ease,transform 0.25s cubic-bezier(0.34,1.4,0.64,1);`;
 
     panel.querySelector('.panel-close').addEventListener('click', e => {
@@ -579,7 +670,8 @@
     if (panel.classList.contains('visible')) { panel.style.zIndex = ++zTop; return; }
 
     const rect   = btn.getBoundingClientRect();
-    const isLeft = i >= 4;
+    const angle = angles[i] || 0;
+    const isLeft = Math.cos(angle) < 0;
     const isTop  = i === 0;
     let left = isLeft ? rect.left - pw - GAP : rect.right + GAP;
     let top  = isTop  ? rect.top : rect.top - 20;

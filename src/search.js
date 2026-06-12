@@ -27,6 +27,7 @@ async function searchBookmarks(query) {
     const haystack = [
       bookmark.title || "",
       bookmark.text || "",
+      htmlToSearchText(bookmark.richHtml || ""),
       bookmark.note || "",
       Array.isArray(bookmark.tags) ? bookmark.tags.join(" ") : "",
       attachments.map((attachment) => [
@@ -61,7 +62,13 @@ async function searchSessions(query) {
       session.command || "",
       session.status || "",
       session.startedAt || "",
-      session.endedAt || ""
+      session.endedAt || "",
+      session.git?.root || "",
+      session.git?.branchBefore || "",
+      session.git?.branchAfter || "",
+      session.git?.commitBefore || "",
+      session.git?.commitAfter || "",
+      ...(session.git?.changedFiles || []).map(file => `${file.status || ""} ${file.path || ""}`)
     ].join("\n");
     const metadataSnippet = findSnippet(metadata, query);
 
@@ -79,6 +86,12 @@ async function searchSessions(query) {
     const transcriptSnippet = await findFileSnippet(session.transcriptPath, query);
     if (transcriptSnippet) {
       results.push(sessionResult(session, "transcript", transcriptSnippet));
+      continue;
+    }
+
+    const structuredSnippet = await findFileSnippet(session.transcriptEventsPath, query);
+    if (structuredSnippet) {
+      results.push(sessionResult(session, "structured transcript", structuredSnippet));
     }
   }
 
@@ -92,7 +105,9 @@ function sessionResult(session, source, snippet) {
     title: session.command || "Tracked session",
     createdAt: session.startedAt || "",
     source,
-    path: source === "transcript" ? session.transcriptPath : session.wrapUpPath,
+    path: source === "transcript"
+      ? session.transcriptPath
+      : (source === "structured transcript" ? session.transcriptEventsPath : session.wrapUpPath),
     snippet
   };
 }
@@ -121,6 +136,19 @@ function findSnippet(value, query) {
     .slice(start, end)
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function htmlToSearchText(value) {
+  return String(value || "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#039;|&apos;/gi, "'");
 }
 
 function scoreResult(result, query) {

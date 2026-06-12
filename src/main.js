@@ -7,6 +7,8 @@ const { pathToFileURL } = require("node:url");
 const { exportArchive, importArchive } = require("./export");
 const { readImageText } = require("./ocr");
 const { searchArchive } = require("./search");
+const { auditArchiveHealth } = require("./health");
+const { repairLegacySessions } = require("./repair");
 const pty = require("node-pty");
 const { deleteBookmark, deleteSession, ensureStore, getStorePaths, isInsideBaseDir, readBookmarks, readSessions, updateBookmarks, writeBookmarks } = require("./store");
 
@@ -37,6 +39,7 @@ function startCaptureServer() {
             id:           randomUUID(),
             title:        data.title || data.url || "Browser capture",
             text:         (data.text || "").trim(),
+            richHtml:     (data.richHtml || "").trim(),
             note:         `Captured from ${data.source || "browser"} — ${data.url || ""}`.trim(),
             tags:         ["browser", data.source].filter(Boolean),
             source:       "browser-extension",
@@ -89,7 +92,25 @@ function showCaptureWindow(text = "") {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
-  mainWindow.webContents.send("clipboard-captured", text);
+  mainWindow.webContents.send("clipboard-captured", normalizeClipboardContent(text));
+}
+
+function readClipboardContent() {
+  return normalizeClipboardContent({
+    text: clipboard.readText(),
+    html: clipboard.readHTML()
+  });
+}
+
+function normalizeClipboardContent(content) {
+  if (typeof content === "string") {
+    return { text: content, html: "" };
+  }
+
+  return {
+    text: String(content?.text || ""),
+    html: String(content?.html || "")
+  };
 }
 
 async function captureScreenshot() {
@@ -211,12 +232,12 @@ app.whenReady().then(async () => {
   startCaptureServer();
 
   globalShortcut.register("CommandOrControl+Shift+B", () => {
-    showCaptureWindow(clipboard.readText());
+    showCaptureWindow(readClipboardContent());
   });
 
   globalShortcut.register("CommandOrControl+Shift+S", async () => {
     const screenshot = await captureScreenshot();
-    showCaptureWindow(clipboard.readText());
+    showCaptureWindow(readClipboardContent());
     mainWindow.webContents.send("screenshot-captured", screenshot);
   });
 
@@ -234,6 +255,27 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.handle("clipboard:read", () => clipboard.readText());
+
+ipcMain.handle("clipboard:read-content", () => readClipboardContent());
+
+ipcMain.handle("clipboard:write-text", (_event, text) => {
+  clipboard.writeText(String(text || ""));
+  return true;
+});
+
+ipcMain.handle("clipboard:write-content", (_event, content) => {
+  const normalized = normalizeClipboardContent(content);
+  if (normalized.html.trim()) {
+    clipboard.write({
+      text: normalized.text,
+      html: normalized.html
+    });
+    return true;
+  }
+
+  clipboard.writeText(normalized.text);
+  return true;
+});
 
 ipcMain.handle("clipboard:image", async () => saveClipboardImage());
 
@@ -289,6 +331,7 @@ ipcMain.handle("bookmarks:add", async (_event, bookmark) => {
     id: randomUUID(),
     title: bookmark.title?.trim() || "",
     text: bookmark.text?.trim() || "",
+    richHtml: bookmark.richHtml?.trim() || "",
     note: bookmark.note?.trim() || "",
     tags: Array.isArray(bookmark.tags) ? bookmark.tags : [],
     source: bookmark.source || "quick-save",
@@ -363,8 +406,12 @@ ipcMain.handle("doctor:check", async () => {
   const swift = require("node:child_process").spawnSync("swift", ["--version"], { encoding: "utf8" });
   checks.push({ name: "Swift OCR", ok: swift.status === 0, detail: swift.status === 0 ? swift.stdout.split("\n")[0] : swift.stderr.trim() });
 
+  checks.push(...await auditArchiveHealth());
+
   return checks;
 });
+
+ipcMain.handle("sessions:repair-legacy", async () => repairLegacySessions());
 
 ipcMain.handle("sessions:delete", async (_event, id) => {
   await deleteSession(id);
